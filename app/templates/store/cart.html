@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Cart — NewNational Footwear{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+  <div class="container">
+    <h2 class="fw-900 mb-1">Your Cart</h2>
+    <p class="text-muted small mb-4">Review items before checkout</p>
+    <div class="row g-4">
+      <div class="col-lg-8" id="cartItems">
+        <div class="text-center py-5">
+          <div class="spinner-border text-success" role="status"></div>
+        </div>
+      </div>
+      <div class="col-lg-4" id="cartSummary"></div>
+    </div>
+  </div>
+</section>
+{% endblock %}

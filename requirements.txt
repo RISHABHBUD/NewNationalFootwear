@@ -1,0 +1,17 @@
+fastapi==0.111.0
+pydantic-settings==2.2.1
+uvicorn[standard]==0.29.0
+sqlalchemy==2.0.30
+alembic==1.13.1
+psycopg2-binary==2.9.9
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+cloudinary==1.40.0
+razorpay==1.4.1
+fpdf2==2.7.9
+twilio==9.1.1
+python-dotenv==1.0.1
+jinja2==3.1.4
+aiofiles==23.2.1
+pillow==10.3.0

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% block title %}Register — NewNational Footwear{% endblock %}
+
+{% block content %}
+<section class="checkout-section d-flex align-items-center" style="min-height:80vh">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="checkout-card">
+          <div class="text-center mb-4">
+            <span class="brand-box">NN</span>
+            <h3 class="fw-900 mt-3">Create Account</h3>
+            <p class="text-muted small">Join NewNational Footwear</p>
+          </div>
+          {% if error %}
+          <div class="alert alert-danger py-2 small rounded-3">{{ error }}</div>
+          {% endif %}
+          <form method="POST" action="/register">
+            <div class="mb-3">
+              <label class="form-label fw-700 small">Full Name</label>
+              <input type="text" name="name" class="form-control" placeholder="Your full name" required autofocus/>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-700 small">Phone Number</label>
+              <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number" required/>
+            </div>
+            <div class="mb-3">
+              <label class="form-label fw-700 small">Email <span class="text-muted fw-400">(optional)</span></label>
+              <input type="email" name="email" class="form-control" placeholder="you@email.com"/>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-700 small">Password</label>
+              <input type="password" name="password" class="form-control" placeholder="Min 6 characters" required minlength="6"/>
+            </div>
+            <button type="submit" class="btn btn-black w-100 py-2 fw-700">Create Account</button>
+          </form>
+          <p class="text-center text-muted small mt-4 mb-0">
+            Already have an account? <a href="/login" class="text-accent fw-700">Login</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

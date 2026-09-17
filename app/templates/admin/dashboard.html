@@ -1,0 +1,112 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Dashboard — Admin{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+{% block mob_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <h4 class="fw-900 mb-1">Dashboard</h4>
+  <p class="text-muted small mb-4">Overview of your store</p>
+
+  <!-- STAT CARDS -->
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div style="width:36px;height:36px;background:rgba(46,204,113,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-bag-check text-accent"></i>
+          </div>
+          <span class="text-muted small">Total Orders</span>
+        </div>
+        <div class="stat-num">{{ total_orders }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div style="width:36px;height:36px;background:#fff3cd;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-clock" style="color:#856404"></i>
+          </div>
+          <span class="text-muted small">Pending</span>
+        </div>
+        <div class="stat-num" style="color:#856404">{{ pending_orders }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div style="width:36px;height:36px;background:#f0f0f0;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-box"></i>
+          </div>
+          <span class="text-muted small">Products</span>
+        </div>
+        <div class="stat-num">{{ total_products }}</div>
+      </div>
+    </div>
+    <div class="col-6 col-md-3">
+      <div class="stat-card">
+        <div class="d-flex align-items-center gap-2 mb-2">
+          <div style="width:36px;height:36px;background:rgba(46,204,113,0.12);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <i class="bi bi-currency-rupee text-accent"></i>
+          </div>
+          <span class="text-muted small">Revenue</span>
+        </div>
+        <div class="stat-num text-accent">₹{{ revenue|int }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RECENT ORDERS HEADER -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h5 class="fw-800 mb-0">Recent Orders</h5>
+    <a href="/admin/orders" class="btn btn-sm btn-outline-dark">View All</a>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="d-none d-md-block bg-white rounded-3 border table-scroll">
+    <table class="table table-hover mb-0">
+      <thead class="table-light">
+        <tr><th>#</th><th>Customer</th><th>Phone</th><th>Amount</th><th>Method</th><th>Status</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for order in recent_orders %}
+        <tr>
+          <td class="fw-700">#{{ order.id }}</td>
+          <td>{{ order.customer_name }}</td>
+          <td class="text-muted small">{{ order.customer_phone }}</td>
+          <td class="fw-700">₹{{ order.total_amount|int }}</td>
+          <td><span class="badge bg-secondary">{{ order.payment_method.value|upper }}</span></td>
+          <td><span class="badge badge-{{ order.order_status.value }}">{{ order.order_status.value|upper }}</span></td>
+          <td><a href="/admin/orders/{{ order.id }}" class="btn btn-sm btn-outline-dark py-0">View</a></td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="text-center text-muted py-4">No orders yet</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MOBILE ORDER CARDS -->
+  <div class="d-md-none">
+    {% for order in recent_orders %}
+    <a href="/admin/orders/{{ order.id }}" class="text-decoration-none">
+      <div class="order-card">
+        <div class="order-card-head">
+          <span class="fw-900 text-dark">#{{ order.id }} — {{ order.customer_name }}</span>
+          <span class="badge badge-{{ order.order_status.value }}">{{ order.order_status.value|upper }}</span>
+        </div>
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <div class="text-muted small">{{ order.customer_phone }}</div>
+            <span class="badge bg-secondary small">{{ order.payment_method.value|upper }}</span>
+          </div>
+          <div class="fw-900 text-dark">₹{{ order.total_amount|int }}</div>
+        </div>
+      </div>
+    </a>
+    {% else %}
+    <div class="text-center text-muted py-4">No orders yet</div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

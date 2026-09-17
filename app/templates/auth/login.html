@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Login — NewNational Footwear{% endblock %}
+
+{% block content %}
+<section class="checkout-section d-flex align-items-center" style="min-height:80vh">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-5 col-lg-4">
+        <div class="checkout-card">
+          <div class="text-center mb-4">
+            <span class="brand-box">NN</span>
+            <h3 class="fw-900 mt-3">Welcome Back</h3>
+            <p class="text-muted small">Sign in to your account</p>
+          </div>
+          {% if error %}
+          <div class="alert alert-danger py-2 small rounded-3">{{ error }}</div>
+          {% endif %}
+          <form method="POST" action="/login">
+            <div class="mb-3">
+              <label class="form-label fw-700 small">Phone Number</label>
+              <input type="tel" name="phone" class="form-control" placeholder="10-digit mobile number" required autofocus/>
+            </div>
+            <div class="mb-4">
+              <label class="form-label fw-700 small">Password</label>
+              <input type="password" name="password" class="form-control" placeholder="••••••••" required/>
+            </div>
+            <button type="submit" class="btn btn-black w-100 py-2 fw-700">Login</button>
+          </form>
+          <p class="text-center text-muted small mt-4 mb-2">
+            Don't have an account? <a href="/register" class="text-accent fw-700">Register</a>
+          </p>
+          <hr/>
+          <p class="text-center mb-0">
+            <a href="/checkout" class="text-muted small">Continue as Guest →</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

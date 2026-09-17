@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}{{ product.name }} — NewNational Footwear{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-white">
+  <div class="container">
+    <nav class="mb-4"><ol class="breadcrumb small">
+      <li class="breadcrumb-item"><a href="/" class="text-muted text-decoration-none">Home</a></li>
+      <li class="breadcrumb-item"><a href="/products?category={{ product.category }}" class="text-muted text-decoration-none">{{ product.category|capitalize }}</a></li>
+      <li class="breadcrumb-item active">{{ product.name }}</li>
+    </ol></nav>
+
+    <div class="row g-5">
+      <!-- Images -->
+      <div class="col-lg-6">
+        {% set images = product.images|ensure_list %}
+        <div class="rounded-3 overflow-hidden border" style="height:420px;background:var(--gray)">
+          <img id="mainImg"
+               src="{{ images[0] if images else 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=700&q=80' }}"
+               style="width:100%;height:100%;object-fit:cover" alt="{{ product.name }}"/>
+        </div>
+        {% if images|length > 1 %}
+        <div class="d-flex gap-2 mt-3 flex-wrap">
+          {% for img in images %}
+          <div style="width:70px;height:70px;cursor:pointer;border-radius:8px;overflow:hidden;border:2px solid var(--border)"
+               onclick="document.getElementById('mainImg').src='{{ img }}'">
+            <img src="{{ img }}" style="width:100%;height:100%;object-fit:cover" alt=""/>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+      </div>
+
+      <!-- Details -->
+      <div class="col-lg-6">
+        <span class="tag-pill mb-3 d-inline-block">{{ product.category|upper }}</span>
+        <h2 class="fw-900" style="letter-spacing:-1px">{{ product.name }}</h2>
+        <div class="d-flex align-items-baseline gap-3 mt-2 mb-4">
+          <span style="font-size:2rem;font-weight:900;color:var(--black)">₹{{ product.price|int }}</span>
+          <span class="text-muted small">+ ₹150 delivery charge</span>
+        </div>
+        {% if product.description %}
+        <p class="text-muted mb-4" style="line-height:1.7">{{ product.description }}</p>
+        {% endif %}
+
+        <!-- Size selector -->
+        <div class="mb-4">
+          <p class="fw-800 mb-2 small text-uppercase" style="letter-spacing:1px">Select Size *</p>
+          <div class="d-flex gap-2 flex-wrap" id="sizeOptions">
+            {% for size in product.sizes|ensure_list %}
+            <button type="button" class="size-btn" onclick="selectSize(this, {{ size }})">{{ size }}</button>
+            {% endfor %}
+          </div>
+          <p id="sizeMsg" class="small text-danger mt-2" style="display:none">Please select a size first.</p>
+        </div>
+
+        <!-- Order Now button -->
+        <div class="d-flex gap-3 flex-wrap">
+          <button class="btn btn-black px-5 py-2 fw-700" onclick="orderNow()">
+            <i class="bi bi-bag-check me-2"></i>Order Now
+          </button>
+        </div>
+
+        <div class="d-flex gap-4 flex-wrap mt-4 pt-4 border-top">
+          <small class="text-muted"><i class="bi bi-truck text-accent me-1"></i>Fast delivery</small>
+          <small class="text-muted"><i class="bi bi-cash-coin text-accent me-1"></i>COD available</small>
+          <small class="text-muted"><i class="bi bi-shield-check text-accent me-1"></i>Secure payment</small>
+        </div>
+      </div>
+    </div>
+
+    <!-- Related -->
+    {% if related %}
+    <div class="mt-5 pt-4 border-top">
+      <div class="mb-4">
+        <span class="section-tag">You May Also Like</span>
+        <h3 class="section-title">Related Products</h3>
+      </div>
+      <div class="row g-4">
+        {% for p in related %}
+        {% set ri = (p.images|ensure_list)|first if p.images else 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80' %}
+        <div class="col-6 col-md-3">
+          <div class="prod-card">
+            <div class="prod-img"><a href="/products/{{ p.id }}"><img src="{{ ri }}" alt="{{ p.name }}"/></a></div>
+            <div class="prod-body">
+              <span class="prod-cat">{{ p.category }}</span>
+              <h6 class="prod-name"><a href="/products/{{ p.id }}" class="text-decoration-none text-dark">{{ p.name }}</a></h6>
+              <div class="prod-foot">
+                <span class="prod-price">₹{{ p.price|int }}</span>
+                <a href="/products/{{ p.id }}" class="add-cart"><i class="bi bi-arrow-right"></i></a>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const PROD = {
+  id: {{ product.id }},
+  name: "{{ product.name | replace('"', '\\"') | replace("'", "\\'") }}",
+  price: {{ product.price }},
+  image: "{{ (product.images|ensure_list)|first if product.images else '' }}"
+};
+let selectedSize = null;
+
+function selectSize(btn, size) {
+  document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedSize = size;
+  document.getElementById('sizeMsg').style.display = 'none';
+}
+
+function orderNow() {
+  if (!selectedSize) {
+    const msg = document.getElementById('sizeMsg');
+    msg.style.display = 'block';
+    msg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  sessionStorage.setItem('directOrder', JSON.stringify({
+    product_id: PROD.id,
+    name: PROD.name,
+    price: PROD.price,
+    image: PROD.image,
+    size: selectedSize,
+    quantity: 1
+  }));
+  window.location.href = '/checkout';
+}
+</script>
+{% endblock %}

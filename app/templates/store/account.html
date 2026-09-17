@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}My Account — NewNational Footwear{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+  <div class="container">
+    <h2 class="fw-900 mb-1">My Account</h2>
+    <p class="text-muted small mb-4">Welcome back, {{ user.name }}</p>
+    <div class="row g-4">
+      <div class="col-md-3">
+        <div class="checkout-card">
+          <div class="av mb-3 mx-auto" style="width:52px;height:52px;font-size:1.3rem">{{ user.name[0]|upper }}</div>
+          <h6 class="fw-800 mb-1 text-center">{{ user.name }}</h6>
+          <p class="text-muted small text-center mb-1">{{ user.phone }}</p>
+          {% if user.email %}<p class="text-muted small text-center mb-3">{{ user.email }}</p>{% endif %}
+          <a href="/logout" class="btn btn-sm btn-outline-dark w-100 mt-2">Logout</a>
+          <a href="/products" class="btn btn-sm btn-black w-100 mt-2">Shop Now</a>
+        </div>
+      </div>
+      <div class="col-md-9">
+        <div class="checkout-card">
+          <h5 class="fw-800 mb-4">Order History</h5>
+          {% if orders %}
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead class="table-light">
+                <tr><th>#</th><th>Date</th><th>Items</th><th>Total</th><th>Payment</th><th>Status</th></tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                <tr>
+                  <td class="fw-700">#{{ order.id }}</td>
+                  <td class="text-muted small">{{ order.created_at.strftime('%d %b %Y') }}</td>
+                  <td class="text-muted small">{{ order.items|length }} item(s)</td>
+                  <td class="fw-700">₹{{ order.total_amount|int }}</td>
+                  <td><span class="badge bg-secondary">{{ order.payment_method.value|upper }}</span></td>
+                  <td>
+                    <span class="badge badge-{{ order.order_status.value }}">
+                      {{ order.order_status.value|upper }}
+                    </span>
+                  </td>
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          {% else %}
+          <div class="text-center py-5">
+            <i class="bi bi-bag" style="font-size:2.5rem;color:var(--muted)"></i>
+            <p class="text-muted mt-3 mb-1">No orders yet.</p>
+            <a href="/products" class="btn btn-black mt-2">Start Shopping</a>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

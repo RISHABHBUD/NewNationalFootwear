@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Sports Shoes' if category == 'sports' else 'Sneakers' if category == 'sneakers' else 'All Products' }} — NewNational Footwear{% endblock %}
+{% block nav_sports %}{% if category == 'sports' %}active{% endif %}{% endblock %}
+{% block nav_sneakers %}{% if category == 'sneakers' %}active{% endif %}{% endblock %}
+
+{% block content %}
+<section class="py-4 bg-light-gray" style="min-height:80vh">
+  <div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+      <div>
+        <span class="section-tag">{{ category|upper if category else 'ALL' }}</span>
+        <h2 class="section-title mb-0">
+          {{ 'Sports Shoes' if category == 'sports' else 'Sneakers' if category == 'sneakers' else 'All Products' }}
+        </h2>
+      </div>
+      <div class="d-flex gap-2 align-items-center flex-wrap">
+        <a href="/products" class="btn btn-sm {{ 'btn-black' if not category else 'btn-outline-black' }}">All</a>
+        <a href="/products?category=sports" class="btn btn-sm {{ 'btn-black' if category == 'sports' else 'btn-outline-black' }}">Sports</a>
+        <a href="/products?category=sneakers" class="btn btn-sm {{ 'btn-black' if category == 'sneakers' else 'btn-outline-black' }}">Sneakers</a>
+        <select class="form-select form-select-sm" style="width:auto"
+                onchange="location.href='/products?{% if category %}category={{ category }}&{% endif %}sort='+this.value">
+          <option value="newest" {% if sort=='newest' %}selected{% endif %}>Newest</option>
+          <option value="price_asc" {% if sort=='price_asc' %}selected{% endif %}>Price ↑</option>
+          <option value="price_desc" {% if sort=='price_desc' %}selected{% endif %}>Price ↓</option>
+        </select>
+      </div>
+    </div>
+
+    {% if products %}
+    <div class="row g-3">
+      {% for product in products %}
+      {% set img = (product.images|ensure_list)|first if product.images else 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80' %}
+      {% set sizes = product.sizes|ensure_list %}
+      <div class="col-6 col-md-4 col-lg-3">
+        <div class="prod-card">
+          <div class="prod-img">
+            <a href="/products/{{ product.id }}">
+              <img src="{{ img }}" alt="{{ product.name }}"/>
+            </a>
+          </div>
+          <div class="prod-body">
+            <span class="prod-cat">{{ product.category }}</span>
+            <h6 class="prod-name">
+              <a href="/products/{{ product.id }}" class="text-decoration-none text-dark">{{ product.name }}</a>
+            </h6>
+            <div class="prod-sizes-strip">
+              <span class="sizes-label">Sizes</span>
+              {% for size in sizes %}<span>{{ size }}</span>{% endfor %}
+            </div>
+            <div class="d-flex justify-content-between align-items-center mt-2">
+              <span class="prod-price">₹{{ product.price|int }}</span>
+              <button class="btn-order-now order-btn"
+                data-id="{{ product.id }}"
+                data-name="{{ product.name }}"
+                data-price="{{ product.price }}"
+                data-image="{{ img }}"
+                data-sizes="{{ sizes|join(',') }}">
+                Order Now
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    {% if total_pages > 1 %}
+    <div class="d-flex justify-content-center gap-2 mt-5">
+      {% for p in range(1, total_pages + 1) %}
+      <a href="/products?{% if category %}category={{ category }}&{% endif %}sort={{ sort }}&page={{ p }}"
+         class="btn btn-sm {{ 'btn-black' if p == page else 'btn-outline-black' }}">{{ p }}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    {% else %}
+    <div class="text-center py-5">
+      <i class="bi bi-box" style="font-size:3rem;color:var(--muted)"></i>
+      <p class="mt-3 text-muted">No products found.</p>
+      <a href="/products" class="btn btn-black mt-2">View All</a>
+    </div>
+    {% endif %}
+  </div>
+</section>
+
+<!-- SIZE PICKER MODAL -->
+<div class="modal fade" id="sizeModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 border-0 shadow-lg p-2">
+      <div class="modal-header border-0 pb-0">
+        <div>
+          <h5 class="modal-title fw-900" id="modalProductName"></h5>
+          <p class="text-muted small mb-0" id="modalProductPrice"></p>
+        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body pt-3">
+        <p class="fw-700 small text-uppercase mb-2" style="letter-spacing:1px">Select Size</p>
+        <div id="modalSizes" class="d-flex gap-2 flex-wrap mb-2"></div>
+        <p id="modalSizeMsg" class="text-danger small" style="display:none">Please select a size.</p>
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-black w-100 py-2 fw-700" onclick="proceedToCheckout()">
+          <i class="bi bi-bag-check me-2"></i>Proceed to Checkout
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let _currentProduct = null;
+let _selectedSize   = null;
+let _bsModal        = null;
+
+// Attach click handlers via data attributes — no inline JS
+document.addEventListener('DOMContentLoaded', function() {
+  document.querySelectorAll('.order-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      const id     = parseInt(this.dataset.id);
+      const name   = this.dataset.name;
+      const price  = parseFloat(this.dataset.price);
+      const image  = this.dataset.image;
+      const sizes  = this.dataset.sizes.split(',').map(s => s.trim()).filter(Boolean);
+      openSizePicker(id, name, price, image, sizes);
+    });
+  });
+});
+
+function openSizePicker(id, name, price, image, sizes) {
+  _currentProduct = { product_id: id, name, price, image, quantity: 1 };
+  _selectedSize   = null;
+  document.getElementById('modalProductName').textContent = name;
+  document.getElementById('modalProductPrice').textContent = '₹' + price + ' + ₹150 delivery';
+  document.getElementById('modalSizeMsg').style.display = 'none';
+  document.getElementById('modalSizes').innerHTML = sizes.map(s =>
+    `<button type="button" class="size-btn" data-size="${s}">${s}</button>`
+  ).join('');
+  // attach size btn clicks
+  document.querySelectorAll('#modalSizes .size-btn').forEach(function(b) {
+    b.addEventListener('click', function() {
+      document.querySelectorAll('#modalSizes .size-btn').forEach(x => x.classList.remove('active'));
+      this.classList.add('active');
+      _selectedSize = this.dataset.size;
+      document.getElementById('modalSizeMsg').style.display = 'none';
+    });
+  });
+  _bsModal = new bootstrap.Modal(document.getElementById('sizeModal'));
+  _bsModal.show();
+}
+
+function proceedToCheckout() {
+  if (!_selectedSize) {
+    document.getElementById('modalSizeMsg').style.display = 'block';
+    return;
+  }
+  sessionStorage.setItem('directOrder', JSON.stringify({
+    ..._currentProduct, size: _selectedSize
+  }));
+  window.location.href = '/checkout';
+}
+</script>
+{% endblock %}

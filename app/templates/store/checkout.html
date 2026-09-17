@@ -1,0 +1,249 @@
+{% extends "base.html" %}
+{% block title %}Checkout — NewNational Footwear{% endblock %}
+
+{% block content %}
+<section class="checkout-section">
+  <div class="container">
+    <h2 class="fw-900 mb-1">Checkout</h2>
+    <p class="text-muted small mb-4">Fill in your delivery details</p>
+    <div class="row g-4">
+
+      <!-- FORM -->
+      <div class="col-lg-7">
+        <div class="checkout-card">
+          <h5 class="fw-800 mb-4">Delivery Details</h5>
+          <form id="checkoutForm" novalidate>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-700 small">Full Name *</label>
+                <input type="text" name="name" class="form-control" required
+                       value="{{ user.name if user else '' }}" placeholder="Your full name"/>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-700 small">Phone Number *</label>
+                <input type="tel" name="phone" class="form-control" required
+                       value="{{ user.phone if user else '' }}" placeholder="10-digit mobile"/>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-700 small">Email <span class="text-muted fw-400">(optional)</span></label>
+                <input type="email" name="email" class="form-control"
+                       value="{{ user.email if user else '' }}" placeholder="you@email.com"/>
+              </div>
+              <div class="col-12">
+                <label class="form-label fw-700 small">House No. / Street / Area *</label>
+                <input type="text" name="address_line" class="form-control" required
+                       placeholder="e.g. 12, MG Road, Vijay Nagar"/>
+              </div>
+              <div class="col-md-5">
+                <label class="form-label fw-700 small">City *</label>
+                <input type="text" name="city" class="form-control" required value="Indore"/>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-700 small">State *</label>
+                <input type="text" name="state" class="form-control" required value="Madhya Pradesh"/>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-700 small">Pincode *</label>
+                <input type="text" name="pincode" class="form-control" required
+                       maxlength="6" pattern="[0-9]{6}" placeholder="452001"/>
+              </div>
+            </div>
+
+            <h5 class="fw-800 mt-4 mb-3">Payment Method</h5>
+            <div class="row g-3 mb-4">
+              <div class="col-6">
+                <div class="payment-option selected" id="opt-cod" onclick="selectPayment('cod')" style="cursor:pointer">
+                  <div class="fw-800">💵 Cash on Delivery</div>
+                  <small class="text-muted">Pay ₹{{ delivery_charge }} now, rest on delivery</small>
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="payment-option" id="opt-online" onclick="selectPayment('online')" style="cursor:pointer">
+                  <div class="fw-800">💳 Pay Online</div>
+                  <small class="text-muted">Pay full amount via Razorpay</small>
+                </div>
+              </div>
+            </div>
+            <input type="hidden" id="selectedPayment" value="cod"/>
+
+            <div id="checkoutError" class="alert alert-danger py-2 small rounded-3" style="display:none"></div>
+
+            <button type="button" class="btn btn-black w-100 py-2 fw-700" id="placeOrderBtn" onclick="placeOrder()">
+              <i class="bi bi-bag-check me-2"></i>
+              <span id="btnText">Confirm Order & Pay</span>
+              <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2" style="display:none"></span>
+            </button>
+            <p class="text-muted small text-center mt-2">
+              <i class="bi bi-shield-check text-accent me-1"></i>Payments secured by Razorpay
+            </p>
+          </form>
+        </div>
+      </div>
+
+      <!-- ORDER SUMMARY -->
+      <div class="col-lg-5">
+        <div class="checkout-card" id="orderSummaryCard">
+          <h5 class="fw-800 mb-4">Order Summary</h5>
+          <div id="summaryContent"><p class="text-muted small">Loading...</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+const DELIVERY = {{ delivery_charge }};
+const RZ_KEY   = "{{ razorpay_key }}";
+let orderItem  = null;
+
+function loadOrder() {
+  const raw = sessionStorage.getItem('directOrder');
+  if (!raw) {
+    document.getElementById('summaryContent').innerHTML =
+      '<p class="text-danger small">No product selected. <a href="/products">Go back to shop</a></p>';
+    document.getElementById('placeOrderBtn').disabled = true;
+    return;
+  }
+  orderItem = JSON.parse(raw);
+  renderSummary();
+}
+
+function renderSummary() {
+  if (!orderItem) return;
+  const subtotal = orderItem.price * orderItem.quantity;
+  const total    = subtotal + DELIVERY;
+  const method   = document.getElementById('selectedPayment').value;
+  const payNow   = method === 'cod' ? DELIVERY : total;
+
+  document.getElementById('summaryContent').innerHTML = `
+    <div class="d-flex gap-3 align-items-center mb-4 p-3 bg-light-gray rounded-3">
+      <img src="${orderItem.image || 'https://via.placeholder.com/60'}"
+           style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee" alt=""/>
+      <div class="flex-grow-1">
+        <div class="fw-800">${orderItem.name}</div>
+        <small class="text-muted">Size: <strong>${orderItem.size}</strong> &nbsp;|&nbsp; Qty: 1</small>
+      </div>
+      <span class="fw-900">₹${subtotal.toFixed(0)}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-2 small">
+      <span class="text-muted">Subtotal</span><span class="fw-700">₹${subtotal.toFixed(0)}</span>
+    </div>
+    <div class="d-flex justify-content-between mb-3 small">
+      <span class="text-muted">Delivery Charge</span><span class="fw-700">₹${DELIVERY}</span>
+    </div>
+    <hr/>
+    <div class="d-flex justify-content-between mb-1">
+      <span class="fw-900">Total</span><span class="fw-900 fs-5">₹${total.toFixed(0)}</span>
+    </div>
+    <p class="text-muted small mt-1">${
+      method === 'cod'
+        ? `Pay ₹${DELIVERY} now via Razorpay, ₹${subtotal.toFixed(0)} on delivery`
+        : `Pay full ₹${total.toFixed(0)} online via Razorpay`
+    }</p>`;
+}
+
+function selectPayment(method) {
+  document.getElementById('selectedPayment').value = method;
+  document.getElementById('opt-cod').classList.toggle('selected', method === 'cod');
+  document.getElementById('opt-online').classList.toggle('selected', method === 'online');
+  renderSummary();
+}
+
+async function placeOrder() {
+  if (!orderItem) { showErr('No product selected.'); return; }
+  const form = document.getElementById('checkoutForm');
+  if (!form.checkValidity()) { form.reportValidity(); return; }
+
+  setLoading(true);
+  const data = new FormData(form);
+  data.append('payment_method', document.getElementById('selectedPayment').value);
+  data.append('cart_data', JSON.stringify([{
+    product_id: orderItem.product_id,
+    size: orderItem.size,
+    quantity: orderItem.quantity
+  }]));
+
+  try {
+    const res = await fetch('/checkout/create-order', { method: 'POST', body: data });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      showErr(err.detail || 'Something went wrong. Please try again.');
+      setLoading(false); return;
+    }
+    const order = await res.json();
+
+    // RAZORPAY BYPASSED for testing — directly call verify-payment with dummy values
+    const vData = new FormData();
+    vData.append('razorpay_order_id', order.razorpay_order_id);
+    vData.append('razorpay_payment_id', 'bypass_pay_' + Date.now());
+    vData.append('razorpay_signature', 'bypass_sig');
+    vData.append('order_db_id', order.order_db_id);
+    const vRes = await fetch('/checkout/verify-payment', { method: 'POST', body: vData });
+    const result = await vRes.json();
+    if (result.redirect) {
+      sessionStorage.removeItem('directOrder');
+      window.location.href = result.redirect;
+    } else {
+      showErr('Something went wrong. Please contact us.');
+      setLoading(false);
+    }
+
+    /* RAZORPAY MODAL — uncomment when credentials are ready
+    const options = {
+      key: RZ_KEY,
+      amount: order.amount,
+      currency: 'INR',
+      name: 'NewNational Footwear',
+      description: orderItem.name + ' (Size ' + orderItem.size + ')',
+      order_id: order.razorpay_order_id,
+      prefill: { name: order.name, contact: order.phone, email: order.email },
+      theme: { color: '#2ecc71' },
+      modal: { ondismiss: () => setLoading(false) },
+      handler: async function(response) {
+        const vData = new FormData();
+        vData.append('razorpay_order_id', response.razorpay_order_id);
+        vData.append('razorpay_payment_id', response.razorpay_payment_id);
+        vData.append('razorpay_signature', response.razorpay_signature);
+        vData.append('order_db_id', order.order_db_id);
+        const vRes = await fetch('/checkout/verify-payment', { method: 'POST', body: vData });
+        const result = await vRes.json();
+        if (result.redirect) {
+          sessionStorage.removeItem('directOrder');
+          window.location.href = result.redirect;
+        } else {
+          showErr('Payment done but something went wrong. Please contact us.');
+          setLoading(false);
+        }
+      },
+    };
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', function(resp) {
+      showErr('Payment failed: ' + resp.error.description);
+      setLoading(false);
+    });
+    rzp.open();
+    */
+  } catch(e) {
+    showErr('Network error. Please try again.');
+    setLoading(false);
+  }
+}
+
+function showErr(msg) {
+  const el = document.getElementById('checkoutError');
+  el.textContent = msg; el.style.display = 'block';
+  el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+}
+
+function setLoading(on) {
+  document.getElementById('placeOrderBtn').disabled = on;
+  document.getElementById('btnSpinner').style.display = on ? 'inline-block' : 'none';
+  document.getElementById('btnText').textContent = on ? 'Processing...' : 'Confirm Order & Pay';
+}
+
+document.addEventListener('DOMContentLoaded', loadOrder);
+</script>
+{% endblock %}

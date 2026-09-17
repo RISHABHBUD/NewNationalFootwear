@@ -1,0 +1,124 @@
+{% extends "admin/base_admin.html" %}
+{% block title %}Order #{{ order.id }} — Admin{% endblock %}
+{% block nav_orders %}active{% endblock %}
+{% block mob_orders %}active{% endblock %}
+
+{% block content %}
+<div class="admin-page">
+  <!-- Header -->
+  <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+    <a href="/admin/orders" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
+    <div>
+      <h4 class="fw-900 mb-0">Order #{{ order.id }}</h4>
+      <p class="text-muted small mb-0">{{ order.created_at.strftime('%d %b %Y, %I:%M %p') }}</p>
+    </div>
+    <span class="badge badge-{{ order.order_status.value }}" style="font-size:0.82rem;padding:6px 12px">
+      {{ order.order_status.value|upper }}
+    </span>
+    {% if order.payment_status.value == 'paid' %}
+    <span class="badge badge-delivered" style="font-size:0.82rem;padding:6px 12px">PAID</span>
+    {% endif %}
+  </div>
+
+  <div class="row g-3">
+    <!-- Items -->
+    <div class="col-lg-8">
+      <div class="bg-white rounded-3 border p-3 mb-3">
+        <h6 class="fw-800 mb-3">Order Items</h6>
+        {% for item in order.items %}
+        <div class="d-flex gap-3 align-items-center py-2 {% if not loop.last %}border-bottom{% endif %}">
+          {% if item.product_image %}
+          <img src="{{ item.product_image }}" style="width:52px;height:52px;object-fit:cover;border-radius:8px;flex-shrink:0" alt=""/>
+          {% else %}
+          <div style="width:52px;height:52px;background:#f0f0f0;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center">
+            <i class="bi bi-image text-muted"></i>
+          </div>
+          {% endif %}
+          <div class="flex-grow-1 min-w-0">
+            <div class="fw-700 text-truncate">{{ item.product_name }}</div>
+            <small class="text-muted">Size: {{ item.size }} · Qty: {{ item.quantity }} · ₹{{ item.price|int }} each</small>
+          </div>
+          <div class="fw-800 flex-shrink-0">₹{{ (item.price * item.quantity)|int }}</div>
+        </div>
+        {% endfor %}
+        <div class="pt-3 mt-1 border-top">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Subtotal</span><span>₹{{ order.subtotal|int }}</span>
+          </div>
+          <div class="d-flex justify-content-between small text-muted mb-2">
+            <span>Delivery</span><span>₹{{ order.delivery_charge|int }}</span>
+          </div>
+          <div class="d-flex justify-content-between fw-900">
+            <span>Total</span><span>₹{{ order.total_amount|int }}</span>
+          </div>
+          {% if order.payment_method.value == 'cod' %}
+          <div class="d-flex justify-content-between small mt-1">
+            <span class="text-accent fw-700">Remaining (COD)</span>
+            <span class="fw-700 text-accent">₹{{ order.subtotal|int }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Update status -->
+      <div class="bg-white rounded-3 border p-3">
+        <h6 class="fw-800 mb-3">Update Status</h6>
+        <form method="POST" action="/admin/orders/{{ order.id }}/update-status"
+              class="d-flex gap-2 align-items-center flex-wrap">
+          <select name="order_status" class="form-select" style="max-width:200px">
+            {% for s in statuses %}
+            <option value="{{ s }}" {% if order.order_status.value == s %}selected{% endif %}>{{ s|upper }}</option>
+            {% endfor %}
+          </select>
+          <button type="submit" class="btn btn-black px-4">
+            <i class="bi bi-check-lg me-1"></i>Update
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Customer + Payment -->
+    <div class="col-lg-4">
+      <div class="bg-white rounded-3 border p-3 mb-3">
+        <h6 class="fw-800 mb-3"><i class="bi bi-person me-2 text-accent"></i>Customer</h6>
+        <p class="fw-700 mb-1">{{ order.customer_name }}</p>
+        <p class="text-muted small mb-1">
+          <a href="tel:{{ order.customer_phone }}" class="text-muted text-decoration-none">
+            <i class="bi bi-telephone me-1"></i>{{ order.customer_phone }}
+          </a>
+        </p>
+        {% if order.customer_email %}
+        <p class="text-muted small mb-2"><i class="bi bi-envelope me-1"></i>{{ order.customer_email }}</p>
+        {% endif %}
+        <div class="pt-2 border-top mt-1">
+          <p class="fw-700 small mb-1"><i class="bi bi-geo-alt me-1 text-accent"></i>Address</p>
+          <p class="text-muted small mb-0">{{ order.address_line }}, {{ order.city }}, {{ order.state }} — {{ order.pincode }}</p>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-3 border p-3">
+        <h6 class="fw-800 mb-3"><i class="bi bi-credit-card me-2 text-accent"></i>Payment</h6>
+        <div class="d-flex justify-content-between mb-2 small">
+          <span class="text-muted">Method</span>
+          <span class="badge bg-secondary">{{ order.payment_method.value|upper }}</span>
+        </div>
+        <div class="d-flex justify-content-between mb-2 small">
+          <span class="text-muted">Status</span>
+          {% if order.payment_status.value == 'paid' %}<span class="badge badge-delivered">PAID</span>
+          {% elif order.payment_status.value == 'failed' %}<span class="badge badge-cancelled">FAILED</span>
+          {% else %}<span class="badge badge-pending">PENDING</span>{% endif %}
+        </div>
+        <div class="d-flex justify-content-between small">
+          <span class="text-muted">Paid Now</span>
+          <span class="fw-700">₹{{ order.amount_paid|int }}</span>
+        </div>
+        {% if order.razorpay_payment_id %}
+        <div class="mt-2 pt-2 border-top">
+          <p class="text-muted mb-0" style="font-size:0.68rem;word-break:break-all">ID: {{ order.razorpay_payment_id }}</p>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
