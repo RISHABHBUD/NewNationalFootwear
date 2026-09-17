@@ -49,6 +49,11 @@ app.include_router(admin.router)
 
 @app.get("/favicon.ico", include_in_schema=False)
 def favicon():
+    from fastapi.responses import FileResponse
+    import os
+    favicon_path = "app/static/img/favicon.ico"
+    if os.path.exists(favicon_path):
+        return FileResponse(favicon_path)
     return Response(status_code=204)
 
 

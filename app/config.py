@@ -27,9 +27,13 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str
 
     # Email notifications
-    SMTP_EMAIL: str = ""       # Gmail address you send FROM
-    SMTP_APP_PASSWORD: str = ""  # Gmail App Password (not your login password)
-    NOTIFY_ADMIN_EMAIL: str = ""  # Admin email to receive order notifications
+    SMTP_EMAIL: str = ""
+    SMTP_APP_PASSWORD: str = ""
+    NOTIFY_ADMIN_EMAIL: str = ""
+
+    # SendGrid
+    SENDGRID_API_KEY: str = ""
+    SENDGRID_FROM_EMAIL: str = ""
 
     class Config:
         env_file = ".env"

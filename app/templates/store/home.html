@@ -7,47 +7,25 @@
 <!-- MARQUEE -->
 <div class="strip">
   <div class="strip-inner">
-    <span>SPORTS SHOES</span><span class="dot">●</span>
-    <span>SNEAKERS</span><span class="dot">●</span>
-    <span>COD AVAILABLE</span><span class="dot">●</span>
-    <span>INDORE'S FAVOURITE</span><span class="dot">●</span>
-    <span>PREMIUM QUALITY</span><span class="dot">●</span>
-    <span>FAST DELIVERY</span><span class="dot">●</span>
-    <span>SPORTS SHOES</span><span class="dot">●</span>
-    <span>SNEAKERS</span><span class="dot">●</span>
-    <span>COD AVAILABLE</span><span class="dot">●</span>
+    <span class="strip-item"><i class="bi bi-lightning-charge-fill"></i><span>Sports Shoes</span></span>
+    <span class="strip-item"><i class="bi bi-bag-heart-fill"></i><span>Sneakers Collection</span></span>
+    <span class="strip-item"><i class="bi bi-cash-coin"></i><span>COD Available</span></span>
+    <span class="strip-item"><i class="bi bi-geo-alt-fill"></i><span>Indore's Favourite</span></span>
+    <span class="strip-item"><i class="bi bi-star-fill"></i><span>Premium Quality</span></span>
+    <span class="strip-item"><i class="bi bi-truck"></i><span>Fast Delivery</span></span>
+    <span class="strip-item"><i class="bi bi-shield-check"></i><span>Secure Payments</span></span>
+    <span class="strip-item"><i class="bi bi-arrow-repeat"></i><span>Easy Returns</span></span>
+    <!-- duplicate for seamless loop -->
+    <span class="strip-item"><i class="bi bi-lightning-charge-fill"></i><span>Sports Shoes</span></span>
+    <span class="strip-item"><i class="bi bi-bag-heart-fill"></i><span>Sneakers Collection</span></span>
+    <span class="strip-item"><i class="bi bi-cash-coin"></i><span>COD Available</span></span>
+    <span class="strip-item"><i class="bi bi-geo-alt-fill"></i><span>Indore's Favourite</span></span>
+    <span class="strip-item"><i class="bi bi-star-fill"></i><span>Premium Quality</span></span>
+    <span class="strip-item"><i class="bi bi-truck"></i><span>Fast Delivery</span></span>
+    <span class="strip-item"><i class="bi bi-shield-check"></i><span>Secure Payments</span></span>
+    <span class="strip-item"><i class="bi bi-arrow-repeat"></i><span>Easy Returns</span></span>
   </div>
 </div>
-
-<!-- CATEGORIES -->
-<section class="py-4 bg-white border-bottom">
-  <div class="container">
-    <div class="row g-3">
-      <div class="col-6">
-        <a href="/products?category=sports" class="text-decoration-none">
-          <div class="cat-card-sm">
-            <img src="https://images.unsplash.com/photo-1606107557195-0e29a4b5b4aa?w=600&q=80" alt="Sports"/>
-            <div class="cat-sm-label">
-              <span>Sports Shoes</span>
-              <i class="bi bi-arrow-right-circle-fill text-accent"></i>
-            </div>
-          </div>
-        </a>
-      </div>
-      <div class="col-6">
-        <a href="/products?category=sneakers" class="text-decoration-none">
-          <div class="cat-card-sm">
-            <img src="https://images.unsplash.com/photo-1525966222134-fcfa99b8ae77?w=600&q=80" alt="Sneakers"/>
-            <div class="cat-sm-label">
-              <span>Sneakers</span>
-              <i class="bi bi-arrow-right-circle-fill text-accent"></i>
-            </div>
-          </div>
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- FEATURED -->
 <section class="py-4 bg-light-gray">
@@ -90,6 +68,7 @@
     {% else %}
     <p class="text-muted text-center py-3">No featured products yet.</p>
     {% endif %}
+
   </div>
 </section>
 

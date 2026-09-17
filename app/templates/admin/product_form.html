@@ -4,6 +4,23 @@
 {% block mob_products %}active{% endblock %}
 
 {% block content %}
+<style>
+.size-toggle-btn {
+  width: 48px; height: 48px; border-radius: 10px;
+  border: 2px solid var(--border, #e4e6ea);
+  background: white; color: #1a1a1a;
+  font-weight: 700; font-size: 0.9rem;
+  cursor: pointer; transition: all 0.18s;
+}
+.size-toggle-btn:hover {
+  border-color: #111; background: #f5f6f8;
+}
+.size-toggle-btn.active {
+  background: #111; color: white;
+  border-color: #111;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+</style>
 <div class="admin-page">
   <div class="d-flex align-items-center gap-3 mb-4">
     <a href="/admin/products" class="btn btn-sm btn-outline-secondary"><i class="bi bi-arrow-left"></i></a>
@@ -44,11 +61,18 @@
       </div>
 
       <div class="mb-3">
-        <label class="form-label fw-700 small">Sizes * <span class="fw-400 text-muted">(comma separated)</span></label>
-        <input type="text" name="sizes" class="form-control" required
-               value="{{ (product.sizes|ensure_list)|join(', ') if product else '' }}"
-               placeholder="6, 7, 8, 9, 10"/>
-        <div class="form-text">e.g. 6, 7, 8, 9, 10</div>
+        <label class="form-label fw-700 small">Sizes *</label>
+        <div class="d-flex flex-wrap gap-2 mb-2" id="sizeButtons">
+          {% set selected_sizes = (product.sizes|ensure_list)|map('string')|list if product else [] %}
+          {% for s in ['4','5','6','7','8','9','10','11','12','13'] %}
+          <button type="button"
+            class="size-toggle-btn {% if s in selected_sizes %}active{% endif %}"
+            data-size="{{ s }}">{{ s }}</button>
+          {% endfor %}
+        </div>
+        <input type="hidden" name="sizes" id="sizesInput"
+               value="{{ (product.sizes|ensure_list)|join(', ') if product else '' }}"/>
+        <div class="form-text text-muted small">Click to select / deselect sizes</div>
       </div>
 
       <div class="mb-3">
@@ -83,4 +107,34 @@
     </form>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  const buttons = document.querySelectorAll('.size-toggle-btn');
+  const input = document.getElementById('sizesInput');
+
+  function syncInput() {
+    const selected = [...buttons]
+      .filter(b => b.classList.contains('active'))
+      .map(b => b.dataset.size);
+    input.value = selected.join(', ');
+  }
+
+  buttons.forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      this.classList.toggle('active');
+      syncInput();
+    });
+  });
+
+  document.querySelector('form').addEventListener('submit', function (e) {
+    if (!input.value.trim()) {
+      e.preventDefault();
+      alert('Please select at least one size.');
+    }
+  });
+});
+</script>
 {% endblock %}
