@@ -9,7 +9,7 @@ from app.models.order import Order, OrderItem, PaymentMethod, PaymentStatus, Ord
 from app.auth import get_current_user
 from app.config import settings
 # from app.services import razorpay_service  # BYPASSED — uncomment when Razorpay creds are ready
-from app.services import pdf_service, email_service
+from app.services import razorpay_service, pdf_service, email_service
 
 router = APIRouter()
 
@@ -61,10 +61,9 @@ async def create_order(
     total = subtotal + settings.DELIVERY_CHARGE
     amount_to_pay = settings.DELIVERY_CHARGE if payment_method == "cod" else total
 
-    # RAZORPAY BYPASSED for testing — using a dummy order ID
-    # receipt = f"order_{phone}_{len(cart)}"
-    # rz_order = razorpay_service.create_order(amount_to_pay, receipt)
-    dummy_razorpay_order_id = f"bypass_order_{phone}_{len(cart)}"
+    # Create Razorpay order
+    receipt = f"order_{phone}_{len(cart)}"
+    rz_order = razorpay_service.create_order(amount_to_pay, receipt)
 
     # Save pending order in DB
     order = Order(
@@ -76,7 +75,7 @@ async def create_order(
         city=city, state=state, pincode=pincode,
         payment_method=PaymentMethod(payment_method),
         payment_status=PaymentStatus.pending,
-        razorpay_order_id=dummy_razorpay_order_id,
+        razorpay_order_id=rz_order["id"],
         subtotal=subtotal,
         delivery_charge=settings.DELIVERY_CHARGE,
         total_amount=total,
@@ -101,7 +100,7 @@ async def create_order(
     db.refresh(order)
 
     return {
-        "razorpay_order_id": dummy_razorpay_order_id,
+        "razorpay_order_id": rz_order["id"],
         "razorpay_key": settings.RAZORPAY_KEY_ID,
         "amount": int(amount_to_pay * 100),
         "order_db_id": order.id,
@@ -122,12 +121,12 @@ async def verify_payment(
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
 
-    # RAZORPAY BYPASSED for testing — skip signature verification, auto-confirm
-    # verified = razorpay_service.verify_payment(razorpay_order_id, razorpay_payment_id, razorpay_signature)
-    # if not verified:
-    #     order.payment_status = PaymentStatus.failed
-    #     db.commit()
-    #     raise HTTPException(status_code=400, detail="Payment verification failed")
+    # Verify Razorpay payment signature
+    verified = razorpay_service.verify_payment(razorpay_order_id, razorpay_payment_id, razorpay_signature)
+    if not verified:
+        order.payment_status = PaymentStatus.failed
+        db.commit()
+        raise HTTPException(status_code=400, detail="Payment verification failed")
 
     order.payment_status = PaymentStatus.paid
     order.razorpay_payment_id = razorpay_payment_id

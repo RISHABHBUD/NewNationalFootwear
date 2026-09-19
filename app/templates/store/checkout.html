@@ -175,23 +175,7 @@ async function placeOrder() {
     }
     const order = await res.json();
 
-    // RAZORPAY BYPASSED for testing — directly call verify-payment with dummy values
-    const vData = new FormData();
-    vData.append('razorpay_order_id', order.razorpay_order_id);
-    vData.append('razorpay_payment_id', 'bypass_pay_' + Date.now());
-    vData.append('razorpay_signature', 'bypass_sig');
-    vData.append('order_db_id', order.order_db_id);
-    const vRes = await fetch('/checkout/verify-payment', { method: 'POST', body: vData });
-    const result = await vRes.json();
-    if (result.redirect) {
-      sessionStorage.removeItem('directOrder');
-      window.location.href = result.redirect;
-    } else {
-      showErr('Something went wrong. Please contact us.');
-      setLoading(false);
-    }
-
-    /* RAZORPAY MODAL — uncomment when credentials are ready
+    // Open Razorpay payment modal
     const options = {
       key: RZ_KEY,
       amount: order.amount,
@@ -225,7 +209,6 @@ async function placeOrder() {
       setLoading(false);
     });
     rzp.open();
-    */
   } catch(e) {
     showErr('Network error. Please try again.');
     setLoading(false);
