@@ -37,6 +37,12 @@
             <a href="/products/{{ product.id }}">
               <img src="{{ img }}" alt="{{ product.name }}"/>
             </a>
+            {% if product.reel_url %}
+            <a href="{{ product.reel_url }}" target="_blank" class="reel-overlay">
+              <i class="bi bi-play-circle-fill"></i>
+              <span>Watch Reel</span>
+            </a>
+            {% endif %}
           </div>
           <div class="prod-body">
             <span class="prod-cat">{{ product.category }}</span>
