@@ -15,13 +15,13 @@ def home(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
     featured = db.query(Product).filter(
         Product.is_active == True, Product.is_featured == True
-    ).limit(8).all()
+    ).order_by(Product.created_at.desc()).limit(8).all()
     sports = db.query(Product).filter(
         Product.is_active == True, Product.category == "sports"
-    ).limit(8).all()
+    ).order_by(Product.created_at.desc()).limit(8).all()
     sneakers = db.query(Product).filter(
         Product.is_active == True, Product.category == "sneakers"
-    ).limit(8).all()
+    ).order_by(Product.created_at.desc()).limit(8).all()
     return templates.TemplateResponse("store/home.html", {
         "request": request, "user": user,
         "featured": featured, "sports": sports, "sneakers": sneakers,
