@@ -276,7 +276,38 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
   .admin-content { margin-left: 0; }
 }
 
-/* ORDER NOW BUTTON on cards */
+/* REEL BUTTON */
+.reel-btn {
+  width: 34px; height: 34px; border-radius: 8px;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: white; display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; text-decoration: none; flex-shrink: 0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.reel-btn:hover { transform: scale(1.1); box-shadow: 0 4px 14px rgba(220,39,67,0.4); color: white; }
+
+/* REEL OVERLAY on product image */
+.reel-overlay {
+  position: absolute; bottom: 10px; left: 10px;
+  display: flex; align-items: center; gap: 6px;
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: white; text-decoration: none;
+  padding: 5px 12px 5px 8px; border-radius: 50px;
+  font-size: 0.75rem; font-weight: 800;
+  letter-spacing: 0.3px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  transition: transform 0.2s, box-shadow 0.2s;
+  z-index: 3;
+}
+.reel-overlay i { font-size: 1rem; }
+.reel-overlay:hover { transform: scale(1.05); color: white; box-shadow: 0 6px 20px rgba(220,39,67,0.45); }
+
+.btn-reel {
+  background: linear-gradient(135deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888);
+  color: white; border: none; border-radius: 8px;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.btn-reel:hover { opacity: 0.9; transform: translateY(-2px); color: white; box-shadow: 0 6px 18px rgba(220,39,67,0.35); }
 .btn-order-now {
   background: var(--black); color: white; border: none;
   border-radius: 8px; font-weight: 700; font-size: 0.82rem;

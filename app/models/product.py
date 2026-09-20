@@ -14,6 +14,7 @@ class Product(Base):
     price = Column(Float, nullable=False)
     sizes = Column(JSON, nullable=False)  # e.g. [6, 7, 8, 9, 10]
     images = Column(JSON, nullable=False, default=list, server_default="[]")
+    reel_url = Column(String(500), nullable=True)  # Instagram reel URL
     is_active = Column(Boolean, default=True)
     is_featured = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())

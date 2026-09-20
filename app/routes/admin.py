@@ -64,6 +64,7 @@ async def add_product(
     price: float = Form(...),
     sizes: str = Form(...),
     is_featured: str = Form("off"),
+    reel_url: str = Form(None),
     images: list[UploadFile] = File(default=[]),
 ):
     admin = require_admin(request, db)
@@ -76,12 +77,13 @@ async def add_product(
                 url = upload_image(data, f"{name}_{img.filename}")
                 image_urls.append(url)
             except Exception:
-                pass  # skip failed uploads
+                pass
 
     product = Product(
         name=name, description=description, category=category,
         price=price, sizes=size_list, images=image_urls,
         is_featured=(is_featured == "on"),
+        reel_url=reel_url or None,
     )
     db.add(product)
     db.commit()
@@ -110,7 +112,8 @@ async def edit_product(
     price: float = Form(...),
     sizes: str = Form(...),
     is_featured: str = Form("off"),
-    remove_images: str = Form(""),   # comma-separated indices to remove
+    reel_url: str = Form(None),
+    remove_images: str = Form(""),
     images: list[UploadFile] = File(default=[]),
 ):
     admin = require_admin(request, db)
@@ -124,8 +127,8 @@ async def edit_product(
     product.price = price
     product.sizes = [int(s.strip()) for s in sizes.split(",") if s.strip().isdigit()]
     product.is_featured = (is_featured == "on")
+    product.reel_url = reel_url or None
 
-    # Handle new image uploads
     current_images = list(product.images or [])
     for img in images:
         if img.filename:

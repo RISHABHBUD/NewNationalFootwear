@@ -45,6 +45,12 @@
         <div class="prod-card">
           <div class="prod-img">
             <a href="/products/{{ p.id }}"><img src="{{ img }}" alt="{{ p.name }}"/></a>
+            {% if p.reel_url %}
+            <a href="{{ p.reel_url }}" target="_blank" class="reel-overlay">
+              <i class="bi bi-play-circle-fill"></i>
+              <span>Watch Reel</span>
+            </a>
+            {% endif %}
           </div>
           <div class="prod-body">
             <span class="prod-cat">{{ p.category }}</span>
@@ -122,6 +128,12 @@
         <div class="prod-card">
           <div class="prod-img">
             <a href="/products/{{ p.id }}"><img src="{{ img }}" alt="{{ p.name }}"/></a>
+            {% if p.reel_url %}
+            <a href="{{ p.reel_url }}" target="_blank" class="reel-overlay">
+              <i class="bi bi-play-circle-fill"></i>
+              <span>Watch Reel</span>
+            </a>
+            {% endif %}
           </div>
           <div class="prod-body">
             <span class="prod-cat">{{ p.category }}</span>
