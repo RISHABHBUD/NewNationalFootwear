@@ -59,50 +59,57 @@
 {% block content %}{% endblock %}
 
 {% block footer %}
-<footer class="footer-dark pt-5 pb-3 mt-auto">
+<footer class="footer-dark pt-4 pb-3 mt-auto">
   <div class="container">
-    <div class="row g-4">
-      <div class="col-md-4">
-        <h5 class="fw-bold text-white"><span class="text-accent">NN</span> NewNational Footwear</h5>
-        <p class="text-muted mt-2 small">Indore's trusted shoe store. Premium quality sports and sneaker shoes at the best prices.</p>
-        <div class="soc mt-3">
-          <a href="https://www.instagram.com/newnationalfootwearstores" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
-          <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-          <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-          <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
-        </div>
+
+    <!-- Row 1: Brand + Social -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+      <div>
+        <span class="fw-900 text-white" style="font-size:1rem"><span class="text-accent">NN</span> NewNational Footwear</span>
+        <p class="text-muted mb-0" style="font-size:0.75rem">Indore's trusted shoe store</p>
       </div>
-      <div class="col-md-2">
-        <h6 class="foot-head">Shop</h6>
-        <ul class="foot-links">
-          <li><a href="/products?category=sports">Sports Shoes</a></li>
-          <li><a href="/products?category=sneakers">Sneakers</a></li>
-          <li><a href="/products">All Products</a></li>
-        </ul>
-      </div>
-      <div class="col-md-2">
-        <h6 class="foot-head">Help</h6>
-        <ul class="foot-links">
-          <li><a href="#">FAQ</a></li>
-          <li><a href="#">Track Order</a></li>
-          <li><a href="#">Returns</a></li>
-          <li><a href="#">Contact Us</a></li>
-        </ul>
-      </div>
-      <div class="col-md-4">
-        <h6 class="foot-head">Contact</h6>
-        <ul class="foot-links">
-          <li><i class="bi bi-geo-alt text-accent me-2"></i>Indore, Madhya Pradesh</li>
-          <li><i class="bi bi-telephone text-accent me-2"></i>+91 XXXXX XXXXX</li>
-          <li><i class="bi bi-envelope text-accent me-2"></i>info@newnational.in</li>
-        </ul>
-        <div class="pay-tags mt-2">
-          <span>Razorpay</span><span>UPI</span><span>COD</span>
-        </div>
+      <div class="soc">
+        <a href="https://www.instagram.com/newnationalfootwearstores" target="_blank" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a href="#" aria-label="WhatsApp"><i class="bi bi-whatsapp"></i></a>
       </div>
     </div>
-    <hr class="border-secondary mt-4"/>
-    <p class="text-center text-muted small mb-0">© 2025 NewNational Footwear Stores. All rights reserved.</p>
+
+    <hr class="border-secondary my-2"/>
+
+    <!-- Row 2: Links in 3 compact columns -->
+    <div class="row g-2 mb-3" style="font-size:0.8rem">
+      <div class="col-4">
+        <p class="foot-head mb-1" style="font-size:0.62rem">Shop</p>
+        <a href="/products?category=sports" class="d-block foot-link">Sports</a>
+        <a href="/products?category=sneakers" class="d-block foot-link">Sneakers</a>
+        <a href="/products" class="d-block foot-link">All Products</a>
+      </div>
+      <div class="col-4">
+        <p class="foot-head mb-1" style="font-size:0.62rem">Help</p>
+        <a href="#" class="d-block foot-link">FAQ</a>
+        <a href="#" class="d-block foot-link">Track Order</a>
+        <a href="#" class="d-block foot-link">Returns</a>
+      </div>
+      <div class="col-4">
+        <p class="foot-head mb-1" style="font-size:0.62rem">Contact</p>
+        <span class="d-block foot-link">Indore, MP</span>
+        <a href="tel:+91XXXXXXXXXX" class="d-block foot-link">+91 XXXXX XXXXX</a>
+        <a href="mailto:info@newnational.in" class="d-block foot-link">info@newnational.in</a>
+      </div>
+    </div>
+
+    <hr class="border-secondary my-2"/>
+
+    <!-- Row 3: Pay tags + copyright -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+      <div class="pay-tags">
+        <span>Razorpay</span><span>UPI</span><span>COD</span>
+      </div>
+      <p class="text-muted mb-0" style="font-size:0.7rem">© 2025 NewNational Footwear</p>
+    </div>
+
   </div>
 </footer>
 {% endblock %}

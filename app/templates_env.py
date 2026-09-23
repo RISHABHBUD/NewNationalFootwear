@@ -5,12 +5,19 @@ templates = Jinja2Templates(directory="app/templates")
 
 
 def ensure_list(value):
-    if isinstance(value, list):
-        return value
-    if isinstance(value, dict):
-        return list(value.values())
     if value is None:
         return []
+    if isinstance(value, dict):
+        return [str(v) for v in value.values()]
+    if isinstance(value, list):
+        # flatten any dicts inside the list (e.g. [{"size": 6}, ...])
+        result = []
+        for item in value:
+            if isinstance(item, dict):
+                result.append(str(next(iter(item.values()))))
+            else:
+                result.append(item)
+        return result
     try:
         return list(value)
     except Exception:
