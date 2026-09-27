@@ -15,7 +15,6 @@
     <span class="strip-item"><i class="bi bi-truck"></i><span>Fast Delivery</span></span>
     <span class="strip-item"><i class="bi bi-shield-check"></i><span>Secure Payments</span></span>
     <span class="strip-item"><i class="bi bi-arrow-repeat"></i><span>Easy Returns</span></span>
-    <!-- duplicate for seamless loop -->
     <span class="strip-item"><i class="bi bi-lightning-charge-fill"></i><span>Sports Shoes</span></span>
     <span class="strip-item"><i class="bi bi-bag-heart-fill"></i><span>Sneakers Collection</span></span>
     <span class="strip-item"><i class="bi bi-cash-coin"></i><span>COD Available</span></span>
@@ -26,90 +25,6 @@
     <span class="strip-item"><i class="bi bi-arrow-repeat"></i><span>Easy Returns</span></span>
   </div>
 </div>
-
-<!-- FEATURED -->
-<section class="py-4 bg-light-gray">
-  <div class="container">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <div>
-        <span class="section-tag">Featured</span>
-        <h2 class="section-title mb-0" style="font-size:1.4rem">Top Picks</h2>
-      </div>
-      <a href="/products" class="btn btn-sm btn-outline-black">View All</a>
-    </div>
-    {% if featured %}
-    <div class="row g-3">
-      {% for p in featured %}
-      {% set img = (p.images|ensure_list)|first if p.images else 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80' %}
-      {% set sizes = p.sizes|ensure_list %}
-      <div class="col-6 col-md-4 col-lg-3">
-        <div class="prod-card">
-          <div class="prod-img">
-            <a href="/products/{{ p.id }}"><img src="{{ img }}" alt="{{ p.name }}"/></a>
-            {% if p.reel_url %}
-            <a href="{{ p.reel_url }}" target="_blank" class="reel-overlay">
-              <i class="bi bi-play-circle-fill"></i><span>Watch Reel</span>
-            </a>
-            {% endif %}
-          </div>
-          <div class="prod-body">
-            <h6 class="prod-name"><a href="/products/{{ p.id }}" class="text-decoration-none text-dark">{{ p.name }}</a></h6>
-            <div class="card-size-section">
-              <span class="card-size-label">Size</span>
-              <div class="card-size-pills" data-product-id="{{ p.id }}">
-                {% for s in sizes %}
-                <button type="button" class="card-size-pill" data-size="{{ s }}">{{ s }}</button>
-                {% endfor %}
-              </div>
-              <p class="card-size-err" id="size-err-{{ p.id }}">Pick a size</p>
-            </div>
-            <div class="card-price-row">
-              <span class="prod-price">₹{{ p.price|int }}</span>
-            </div>
-            <button class="btn-buy-now order-btn"
-              data-id="{{ p.id }}" data-name="{{ p.name }}"
-              data-price="{{ p.price }}" data-image="{{ img }}"
-              data-sizes="{{ sizes|join(',') }}">
-              <i class="bi bi-bag-check-fill"></i> Buy Now
-            </button>
-          </div>
-        </div>
-      </div>
-      {% endfor %}
-    </div>
-    {% else %}
-    <p class="text-muted text-center py-3">No featured products yet.</p>
-    {% endif %}
-  </div>
-</section>
-
-<!-- PROMO CAROUSEL -->
-<section class="py-3 bg-white">
-  <div class="container">
-    <div id="promoCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
-      <div class="carousel-inner rounded-3 overflow-hidden" style="height:110px">
-        <div class="carousel-item active">
-          <div class="promo-slide" style="background:linear-gradient(135deg,#111 60%,#2ecc71)">
-            <div><div class="fw-900 text-white fs-6">🔥 Flat 50% OFF on Sports Shoes</div><div class="text-white small opacity-75">Limited time · Shop now</div></div>
-            <a href="/products?category=sports" class="btn btn-sm btn-light fw-700">Shop</a>
-          </div>
-        </div>
-        <div class="carousel-item">
-          <div class="promo-slide" style="background:linear-gradient(135deg,#111 60%,#3498db)">
-            <div><div class="fw-900 text-white fs-6">👟 Sneakers Starting ₹499</div><div class="text-white small opacity-75">Free delivery on first order</div></div>
-            <a href="/products?category=sneakers" class="btn btn-sm btn-light fw-700">Shop</a>
-          </div>
-        </div>
-        <div class="carousel-item">
-          <div class="promo-slide" style="background:linear-gradient(135deg,#111 60%,#e67e22)">
-            <div><div class="fw-900 text-white fs-6">💵 COD Available · ₹150 Delivery</div><div class="text-white small opacity-75">Pay on delivery · Secure &amp; easy</div></div>
-            <a href="/products" class="btn btn-sm btn-light fw-700">Order</a>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
 
 <!-- ALL PRODUCTS -->
 <section class="py-4 bg-light-gray">
@@ -124,7 +39,7 @@
         <a href="/products?category=sneakers" class="btn btn-sm btn-outline-black">Sneakers</a>
       </div>
     </div>
-    {% set all_products = sports + sneakers %}
+    {% set all_products = all_products %}
     {% if all_products %}
     <div class="row g-3">
       {% for p in all_products %}
@@ -134,13 +49,13 @@
         <div class="prod-card">
           <div class="prod-img">
             <a href="/products/{{ p.id }}"><img src="{{ img }}" alt="{{ p.name }}"/></a>
-            {% if p.reel_url %}
-            <a href="{{ p.reel_url }}" target="_blank" class="reel-overlay">
-              <i class="bi bi-play-circle-fill"></i><span>Watch Reel</span>
-            </a>
-            {% endif %}
           </div>
           <div class="prod-body">
+            {% if p.reel_url %}
+            <a href="{{ p.reel_url }}" target="_blank" class="card-reel-btn">
+              <i class="bi bi-play-circle-fill"></i> Watch Video
+            </a>
+            {% endif %}
             <h6 class="prod-name"><a href="/products/{{ p.id }}" class="text-decoration-none text-dark">{{ p.name }}</a></h6>
             <div class="card-size-section">
               <span class="card-size-label">Size</span>
@@ -168,9 +83,6 @@
     {% else %}
     <p class="text-muted text-center py-3">No products yet.</p>
     {% endif %}
-    <div class="text-center mt-4">
-      <a href="/products" class="btn btn-black px-5">Browse All</a>
-    </div>
   </div>
 </section>
 
@@ -186,15 +98,11 @@
   </div>
 </section>
 
-
-
-
 {% endblock %}
 
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-  // Inline size pill selection
   document.querySelectorAll('.card-size-pills').forEach(function (group) {
     group.querySelectorAll('.card-size-pill').forEach(function (pill) {
       pill.addEventListener('click', function () {
@@ -206,7 +114,6 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
-  // Buy Now
   document.querySelectorAll('.order-btn').forEach(function (btn) {
     btn.addEventListener('click', function () {
       const id = this.dataset.id;

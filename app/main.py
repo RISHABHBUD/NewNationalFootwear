@@ -59,6 +59,10 @@ def favicon():
 
 @app.exception_handler(404)
 def not_found(request: Request, exc):
-    return templates.TemplateResponse(
-        "store/404.html", {"request": request}, status_code=404
-    )
+    from fastapi.responses import JSONResponse
+    # Only render HTML 404 page for browser navigation (GET requests to non-API paths)
+    if request.method == "GET" and not request.url.path.startswith("/checkout/"):
+        return templates.TemplateResponse(
+            "store/404.html", {"request": request}, status_code=404
+        )
+    return JSONResponse({"detail": "Not found"}, status_code=404)

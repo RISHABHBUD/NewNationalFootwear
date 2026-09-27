@@ -147,6 +147,31 @@ async def verify_payment(
     return JSONResponse({"redirect": f"/order-confirmation/{order.id}"})
 
 
+@router.post("/checkout/test-email")
+async def test_email(
+    request: Request,
+    db: Session = Depends(get_db),
+    order_id: int = Form(...),
+):
+    order = db.query(Order).filter(Order.id == order_id).first()
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+
+    try:
+        print(f"[TEST EMAIL] Triggering test email for order #{order.id}...")
+        print(f"[TEST EMAIL] Recipients will be: {settings.NOTIFY_ADMIN_EMAIL or settings.ADMIN_EMAIL}"
+              + (f", {order.customer_email}" if order.customer_email else ""))
+        pdf_path = pdf_service.generate_order_pdf(order)
+        print(f"[TEST EMAIL] PDF generated at: {pdf_path}")
+        email_service.send_order_email(order, pdf_path)
+        print(f"[TEST EMAIL] Done.")
+        from fastapi.responses import JSONResponse
+        return JSONResponse({"ok": True, "message": f"Test email sent for order #{order.id}"})
+    except Exception as e:
+        print(f"[TEST EMAIL ERROR] {type(e).__name__}: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
 @router.get("/order-confirmation/{order_id}", response_class=HTMLResponse)
 def order_confirmation(request: Request, order_id: int, db: Session = Depends(get_db)):
     user = get_current_user(request, db)

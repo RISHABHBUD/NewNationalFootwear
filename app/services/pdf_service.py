@@ -1,94 +1,118 @@
 from fpdf import FPDF
 from app.models.order import Order
 from app.config import settings
-import tempfile, os
+import tempfile
+import os
+
+FONT_PATH = os.path.join(os.path.dirname(__file__), "fonts", "NotoSans.ttf")
+
+
+def num_to_words(n: int) -> str:
+    ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+            "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+            "Seventeen", "Eighteen", "Nineteen"]
+    tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"]
+
+    def _below_1000(num):
+        if num == 0:
+            return ""
+        elif num < 20:
+            return ones[num]
+        elif num < 100:
+            return tens[num // 10] + (" " + ones[num % 10] if num % 10 else "")
+        else:
+            return ones[num // 100] + " Hundred" + (" " + _below_1000(num % 100) if num % 100 else "")
+
+    if n == 0:
+        return "Zero"
+    parts = []
+    if n >= 100000:
+        parts.append(_below_1000(n // 100000) + " Lakh")
+        n %= 100000
+    if n >= 1000:
+        parts.append(_below_1000(n // 1000) + " Thousand")
+        n %= 1000
+    if n > 0:
+        parts.append(_below_1000(n))
+    return " ".join(parts)
 
 
 def generate_order_pdf(order: Order) -> str:
-    """Generate order invoice PDF and return file path."""
-    pdf = FPDF()
+    pdf = FPDF(orientation="L", unit="mm", format="A5")
+    pdf.add_font("NotoSans", "", FONT_PATH, uni=True)
     pdf.add_page()
+    pdf.set_margins(0, 0, 0)
+    pdf.set_auto_page_break(False)
 
-    # Header
-    pdf.set_font("Helvetica", "B", 20)
-    pdf.cell(0, 12, settings.APP_NAME, ln=True, align="C")
-    pdf.set_font("Helvetica", "", 11)
-    pdf.cell(0, 8, "Order Invoice", ln=True, align="C")
-    pdf.ln(4)
+    PAGE_W = 210
+    PAGE_H = 148
+    LEFT_W = 100
+    PAD    = 6
 
-    # Divider
-    pdf.set_draw_color(46, 204, 113)
-    pdf.set_line_width(0.8)
-    pdf.line(10, pdf.get_y(), 200, pdf.get_y())
-    pdf.ln(6)
+    # Outer border
+    pdf.set_draw_color(0, 0, 0)
+    pdf.set_line_width(0.5)
+    pdf.rect(2, 2, PAGE_W - 4, PAGE_H - 4)
 
-    # Order info
-    pdf.set_font("Helvetica", "B", 12)
-    pdf.cell(0, 8, f"Order #{order.id}", ln=True)
-    pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 6, f"Date: {order.created_at.strftime('%d %b %Y, %I:%M %p')}", ln=True)
-    pdf.cell(0, 6, f"Status: {order.order_status.value.upper()}", ln=True)
-    pdf.cell(0, 6, f"Payment: {order.payment_method.value.upper()} | {order.payment_status.value.upper()}", ln=True)
-    pdf.ln(4)
+    # Vertical divider
+    pdf.set_line_width(0.4)
+    pdf.line(LEFT_W, 2, LEFT_W, PAGE_H - 2)
 
-    # Customer info
-    pdf.set_font("Helvetica", "B", 11)
-    pdf.cell(0, 8, "Customer Details", ln=True)
-    pdf.set_font("Helvetica", "", 10)
-    pdf.cell(0, 6, f"Name: {order.customer_name}", ln=True)
-    pdf.cell(0, 6, f"Phone: {order.customer_phone}", ln=True)
-    if order.customer_email:
-        pdf.cell(0, 6, f"Email: {order.customer_email}", ln=True)
-    pdf.cell(0, 6, f"Address: {order.address_line}, {order.city}, {order.state} - {order.pincode}", ln=True)
-    pdf.ln(4)
+    y = [4]
 
-    # Items table header
-    pdf.set_font("Helvetica", "B", 11)
-    pdf.cell(0, 8, "Order Items", ln=True)
-    pdf.set_fill_color(240, 240, 240)
-    pdf.set_font("Helvetica", "B", 10)
-    pdf.cell(80, 8, "Product", border=1, fill=True)
-    pdf.cell(20, 8, "Size", border=1, fill=True, align="C")
-    pdf.cell(20, 8, "Qty", border=1, fill=True, align="C")
-    pdf.cell(35, 8, "Price", border=1, fill=True, align="C")
-    pdf.cell(35, 8, "Total", border=1, fill=True, align="C")
-    pdf.ln()
+    def ln_left(text, bold=False, size=9, gap=5.5):
+        pdf.set_font("Helvetica", "B" if bold else "", size)
+        pdf.set_xy(PAD, y[0])
+        pdf.multi_cell(LEFT_W - PAD * 2, gap, text, align="L")
+        y[0] = pdf.get_y()
 
-    # Items
-    pdf.set_font("Helvetica", "", 10)
+    def divider():
+        pdf.set_draw_color(180, 180, 180)
+        pdf.set_line_width(0.25)
+        pdf.line(PAD, y[0] + 1, LEFT_W - PAD, y[0] + 1)
+        pdf.set_draw_color(0, 0, 0)
+        y[0] += 3.5
+
+    # PAYMENT HEADER
+    method = order.payment_method.value.upper()
+    label  = "Cash ON DELIVERY" if method == "COD" else "PAID ONLINE"
+    ln_left(label, bold=True, size=12, gap=7)
+
+    amt = int(order.subtotal)
+    ln_left(f"Rs. {amt}", bold=True, size=14, gap=8)
+    ln_left(num_to_words(amt) + " Rupees only (in words)", size=10, gap=4.5)
+
+    divider()
+
+    # NOTE
+    ln_left("NOTE : This Delivery is not Open Delivery", bold=True, size=8.5, gap=5)
+    ln_left("Note: Yeh delivery open delivery nahi hai.", size=8, gap=4.5)
+
+    divider()
+
+    # RECEIVER
+    ln_left("To:", bold=True, size=9)
+    ln_left("RECEIVER:", bold=True, size=9)
+    y[0] += 1
+    ln_left(f"Name         -  {order.customer_name}", size=9, gap=5)
+    ln_left(f"Address      -  {order.address_line}", size=9, gap=5)
+    ln_left(f"City             -  {order.city}", size=9, gap=5)
+    ln_left(f"State           -  {order.state}", size=9, gap=5)
+    ln_left(f"Pin Code     -  {order.pincode}", size=9, gap=5)
+    ln_left(f"Mobile        -  {order.customer_phone}", size=9, gap=5)
     for item in order.items:
-        pdf.cell(80, 7, item.product_name[:40], border=1)
-        pdf.cell(20, 7, str(item.size), border=1, align="C")
-        pdf.cell(20, 7, str(item.quantity), border=1, align="C")
-        pdf.cell(35, 7, f"Rs {item.price:.0f}", border=1, align="C")
-        pdf.cell(35, 7, f"Rs {item.price * item.quantity:.0f}", border=1, align="C")
-        pdf.ln()
+        ln_left(f"Size             -  {item.size}  {item.product_name}  x{item.quantity}", size=9, gap=5)
 
-    pdf.ln(4)
+    divider()
 
-    # Totals
-    pdf.set_font("Helvetica", "", 10)
-    pdf.cell(155, 7, "Subtotal", align="R")
-    pdf.cell(35, 7, f"Rs {order.subtotal:.0f}", border=1, align="C")
-    pdf.ln()
-    pdf.cell(155, 7, "Delivery Charge", align="R")
-    pdf.cell(35, 7, f"Rs {order.delivery_charge:.0f}", border=1, align="C")
-    pdf.ln()
-    pdf.set_font("Helvetica", "B", 11)
-    pdf.cell(155, 8, "TOTAL AMOUNT", align="R")
-    pdf.cell(35, 8, f"Rs {order.total_amount:.0f}", border=1, align="C")
-    pdf.ln()
+    # SENDER
+    ln_left(f"CUSTOMER'S ID  -  {order.id}", bold=True, size=8.5, gap=5)
+    ln_left("SPEED POST PARCEL", bold=True, size=8.5, gap=5)
+    ln_left("OM FOOTWEAR", bold=True, size=9, gap=5)
+    ln_left("3, PRINCE YASHWANT ROAD", size=8.5, gap=4.5)
+    ln_left("NEAR PANDARINATH MANDIR, INDORE - 452007", size=8.5, gap=4.5)
+    ln_left("Mobile: +91 89822 02734", size=8.5, gap=4.5)
 
-    if order.payment_method.value == "cod":
-        pdf.set_font("Helvetica", "I", 9)
-        pdf.ln(3)
-        pdf.cell(0, 6, f"Delivery charge paid: Rs {order.delivery_charge:.0f} | Remaining (COD): Rs {order.subtotal:.0f}", ln=True)
-
-    pdf.ln(6)
-    pdf.set_font("Helvetica", "I", 9)
-    pdf.cell(0, 6, "Thank you for shopping with NewNational Footwear!", ln=True, align="C")
-
-    # Save to temp file
-    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf", prefix=f"order_{order.id}_")
+    tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf", prefix=f"label_{order.id}_")
     pdf.output(tmp.name)
     return tmp.name

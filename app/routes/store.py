@@ -13,18 +13,12 @@ router = APIRouter()
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request, db: Session = Depends(get_db)):
     user = get_current_user(request, db)
-    featured = db.query(Product).filter(
-        Product.is_active == True, Product.is_featured == True
-    ).order_by(Product.created_at.desc()).limit(8).all()
-    sports = db.query(Product).filter(
-        Product.is_active == True, Product.category == "sports"
-    ).order_by(Product.created_at.desc()).limit(8).all()
-    sneakers = db.query(Product).filter(
-        Product.is_active == True, Product.category == "sneakers"
-    ).order_by(Product.created_at.desc()).limit(8).all()
+    all_products = db.query(Product).filter(
+        Product.is_active == True
+    ).order_by(Product.created_at.desc()).all()
     return templates.TemplateResponse("store/home.html", {
         "request": request, "user": user,
-        "featured": featured, "sports": sports, "sneakers": sneakers,
+        "all_products": all_products,
     })
 
 
@@ -33,12 +27,15 @@ def product_list(
     request: Request,
     db: Session = Depends(get_db),
     category: str = Query(None),
+    featured: str = Query(None),
     sort: str = Query("newest"),
     page: int = Query(1),
 ):
     user = get_current_user(request, db)
     PAGE_SIZE = 12
     q = db.query(Product).filter(Product.is_active == True)
+    if featured == "true":
+        q = q.filter(Product.is_featured == True)
     if category:
         q = q.filter(Product.category == category)
     if sort == "price_asc":
@@ -55,7 +52,7 @@ def product_list(
     return templates.TemplateResponse("store/product_list.html", {
         "request": request, "user": user,
         "products": products, "category": category,
-        "sort": sort, "page": page, "total_pages": total_pages,
+        "featured": featured, "sort": sort, "page": page, "total_pages": total_pages,
     })
 
 

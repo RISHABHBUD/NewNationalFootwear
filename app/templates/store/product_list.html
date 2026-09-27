@@ -1,16 +1,17 @@
 {% extends "base.html" %}
-{% block title %}{{ 'Sports Shoes' if category == 'sports' else 'Sneakers' if category == 'sneakers' else 'All Products' }} — NewNational Footwear{% endblock %}
+{% block title %}{{ 'Top Picks' if featured == 'true' else 'Sports Shoes' if category == 'sports' else 'Sneakers' if category == 'sneakers' else 'All Products' }} — NewNational Footwear{% endblock %}
 {% block nav_sports %}{% if category == 'sports' %}active{% endif %}{% endblock %}
 {% block nav_sneakers %}{% if category == 'sneakers' %}active{% endif %}{% endblock %}
+{% block nav_featured %}{% if featured == 'true' %}active{% endif %}{% endblock %}
 
 {% block content %}
 <section class="py-4 bg-light-gray" style="min-height:80vh">
   <div class="container">
     <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
       <div>
-        <span class="section-tag">{{ category|upper if category else 'ALL' }}</span>
+        <span class="section-tag">{{ 'Featured' if featured == 'true' else category|upper if category else 'ALL' }}</span>
         <h2 class="section-title mb-0">
-          {{ 'Sports Shoes' if category == 'sports' else 'Sneakers' if category == 'sneakers' else 'All Products' }}
+          {{ 'Top Picks' if featured == 'true' else 'Sports Shoes' if category == 'sports' else 'Sneakers' if category == 'sneakers' else 'All Products' }}
         </h2>
       </div>
       <div class="d-flex gap-2 align-items-center flex-wrap">
@@ -38,13 +39,13 @@
             <a href="/products/{{ product.id }}">
               <img src="{{ img }}" alt="{{ product.name }}"/>
             </a>
-            {% if product.reel_url %}
-            <a href="{{ product.reel_url }}" target="_blank" class="reel-overlay">
-              <i class="bi bi-play-circle-fill"></i><span>Watch Reel</span>
-            </a>
-            {% endif %}
           </div>
           <div class="prod-body">
+            {% if product.reel_url %}
+            <a href="{{ product.reel_url }}" target="_blank" class="card-reel-btn">
+              <i class="bi bi-play-circle-fill"></i> Watch Reel
+            </a>
+            {% endif %}
             <h6 class="prod-name">
               <a href="/products/{{ product.id }}" class="text-decoration-none text-dark">{{ product.name }}</a>
             </h6>

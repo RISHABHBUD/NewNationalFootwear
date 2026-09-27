@@ -54,7 +54,7 @@
               <div class="col-6">
                 <div class="payment-option selected" id="opt-cod" onclick="selectPayment('cod')" style="cursor:pointer">
                   <div class="fw-800">💵 Cash on Delivery</div>
-                  <small class="text-muted">Pay ₹{{ delivery_charge }} now, rest on delivery</small>
+                  <small class="text-muted">Pay ₹{{ delivery_charge }} now, shoes price on delivery</small>
                 </div>
               </div>
               <div class="col-6">
@@ -73,6 +73,7 @@
               <span id="btnText">Confirm Order & Pay</span>
               <span id="btnSpinner" class="spinner-border spinner-border-sm ms-2" style="display:none"></span>
             </button>
+
             <p class="text-muted small text-center mt-2">
               <i class="bi bi-shield-check text-accent me-1"></i>Payments secured by Razorpay
             </p>
@@ -113,43 +114,23 @@ function loadOrder() {
 
 function renderSummary() {
   if (!orderItem) return;
-  const subtotal = orderItem.price * orderItem.quantity;
-  const total    = subtotal + DELIVERY;
-  const method   = document.getElementById('selectedPayment').value;
-  const payNow   = method === 'cod' ? DELIVERY : total;
 
   document.getElementById('summaryContent').innerHTML = `
-    <div class="d-flex gap-3 align-items-center mb-4 p-3 bg-light-gray rounded-3">
-      <img src="${orderItem.image || 'https://via.placeholder.com/60'}"
-           style="width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid #eee" alt=""/>
-      <div class="flex-grow-1">
-        <div class="fw-800">${orderItem.name}</div>
-        <small class="text-muted">Size: <strong>${orderItem.size}</strong> &nbsp;|&nbsp; Qty: 1</small>
+    <div class="d-flex gap-3 align-items-center p-3 bg-light-gray rounded-3">
+      <img src="${orderItem.image || 'https://via.placeholder.com/70'}"
+           style="width:70px;height:70px;object-fit:cover;border-radius:10px;border:1px solid #eee" alt=""/>
+      <div>
+        <div class="fw-800 mb-1">${orderItem.name}</div>
+        <div class="text-muted small">Size: <strong>${orderItem.size}</strong></div>
+        <div class="text-muted small">Qty: <strong>${orderItem.quantity}</strong></div>
       </div>
-      <span class="fw-900">₹${subtotal.toFixed(0)}</span>
-    </div>
-    <div class="d-flex justify-content-between mb-2 small">
-      <span class="text-muted">Subtotal</span><span class="fw-700">₹${subtotal.toFixed(0)}</span>
-    </div>
-    <div class="d-flex justify-content-between mb-3 small">
-      <span class="text-muted">Delivery Charge</span><span class="fw-700">₹${DELIVERY}</span>
-    </div>
-    <hr/>
-    <div class="d-flex justify-content-between mb-1">
-      <span class="fw-900">Total</span><span class="fw-900 fs-5">₹${total.toFixed(0)}</span>
-    </div>
-    <p class="text-muted small mt-1">${
-      method === 'cod'
-        ? `Pay ₹${DELIVERY} now via Razorpay, ₹${subtotal.toFixed(0)} on delivery`
-        : `Pay full ₹${total.toFixed(0)} online via Razorpay`
-    }</p>`;
+    </div>`;
 }
 
 function selectPayment(method) {
   document.getElementById('selectedPayment').value = method;
   document.getElementById('opt-cod').classList.toggle('selected', method === 'cod');
   document.getElementById('opt-online').classList.toggle('selected', method === 'online');
-  renderSummary();
 }
 
 async function placeOrder() {
