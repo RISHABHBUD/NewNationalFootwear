@@ -66,9 +66,7 @@ def send_order_email(order: Order, pdf_path: str) -> None:
         print("[EMAIL] SendGrid credentials not configured, skipping.")
         return
 
-    recipients = [settings.NOTIFY_ADMIN_EMAIL or settings.ADMIN_EMAIL]
-    if order.customer_email and order.customer_email not in recipients:
-        recipients.append(order.customer_email)
+    recipients = ["newnationalfootwearstores@gmail.com"]
 
     subject = f"Order #{order.id} Confirmed — {settings.APP_NAME}"
     html_body = _build_html(order)
