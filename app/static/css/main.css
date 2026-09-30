@@ -15,6 +15,7 @@
 }
 
 * { box-sizing: border-box; }
+html { overflow-x: hidden; }
 body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #fff; color: var(--text); overflow-x: hidden; }
 
 .text-accent { color: var(--accent) !important; }
@@ -83,7 +84,7 @@ body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background
 @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
 
 /* MARQUEE */
-.strip { background: var(--black); padding: 11px 0; overflow: hidden; white-space: nowrap; }
+.strip { background: var(--black); padding: 11px 0; overflow: hidden; white-space: nowrap; width: 100%; max-width: 100%; }
 .strip-inner { display: inline-block; animation: marquee 28s linear infinite; }
 .strip-item { display: inline-flex; align-items: center; gap: 10px; margin-right: 40px; }
 .strip-item i { color: var(--accent); font-size: 1rem; }
