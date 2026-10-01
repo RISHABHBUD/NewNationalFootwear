@@ -38,15 +38,15 @@ def num_to_words(n: int) -> str:
 
 
 def generate_order_pdf(order: Order) -> str:
-    pdf = FPDF(orientation="L", unit="mm", format="A5")
+    pdf = FPDF(orientation="P", unit="mm", format="A5")
     pdf.add_font("NotoSans", "", FONT_PATH, uni=True)
     pdf.add_page()
     pdf.set_margins(0, 0, 0)
     pdf.set_auto_page_break(False)
 
-    PAGE_W = 210
-    PAGE_H = 148
-    LEFT_W = 100
+    PAGE_W = 148
+    PAGE_H = 210
+    LEFT_W = 148
     PAD    = 6
 
     # Outer border - right side only
@@ -54,22 +54,19 @@ def generate_order_pdf(order: Order) -> str:
     pdf.set_line_width(0.5)
     pdf.line(PAGE_W - 2, 2, PAGE_W - 2, PAGE_H - 2)
 
-    # Vertical divider
-    pdf.set_line_width(0.4)
-    pdf.line(LEFT_W, 2, LEFT_W, PAGE_H - 2)
-
     y = [4]
 
-    def ln_left(text, bold=False, size=9, gap=5.5):
+    def ln_left(text, bold=False, size=9, gap=5.5, color=(0,0,0)):
+        pdf.set_text_color(*color)
         pdf.set_font("Helvetica", "B" if bold else "", size)
         pdf.set_xy(PAD, y[0])
-        pdf.multi_cell(LEFT_W - PAD * 2, gap, text, align="L")
+        pdf.multi_cell(PAGE_W - PAD * 2, gap, text, align="L")
         y[0] = pdf.get_y()
 
     def divider():
         pdf.set_draw_color(180, 180, 180)
         pdf.set_line_width(0.25)
-        pdf.line(PAD, y[0] + 1, LEFT_W - PAD, y[0] + 1)
+        pdf.line(PAD, y[0] + 1, PAGE_W - PAD, y[0] + 1)
         pdf.set_draw_color(0, 0, 0)
         y[0] += 3.5
 
@@ -85,9 +82,7 @@ def generate_order_pdf(order: Order) -> str:
     divider()
 
     # NOTE (red)
-    pdf.set_text_color(220, 0, 0)
-    ln_left("NOTE : This Delivery is not Open Delivery", bold=True, size=8.5, gap=5)
-    pdf.set_text_color(0, 0, 0)
+    ln_left("NOTE : This Delivery is not Open Delivery", bold=True, size=8.5, gap=5, color=(220,0,0))
 
     divider()
 
