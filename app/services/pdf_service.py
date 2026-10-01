@@ -49,10 +49,10 @@ def generate_order_pdf(order: Order) -> str:
     LEFT_W = 100
     PAD    = 6
 
-    # Outer border
+    # Outer border - right side only
     pdf.set_draw_color(0, 0, 0)
     pdf.set_line_width(0.5)
-    pdf.rect(2, 2, PAGE_W - 4, PAGE_H - 4)
+    pdf.line(PAGE_W - 2, 2, PAGE_W - 2, PAGE_H - 2)
 
     # Vertical divider
     pdf.set_line_width(0.4)
@@ -84,9 +84,10 @@ def generate_order_pdf(order: Order) -> str:
 
     divider()
 
-    # NOTE
+    # NOTE (red)
+    pdf.set_text_color(220, 0, 0)
     ln_left("NOTE : This Delivery is not Open Delivery", bold=True, size=8.5, gap=5)
-    ln_left("Note: Yeh delivery open delivery nahi hai.", size=8, gap=4.5)
+    pdf.set_text_color(0, 0, 0)
 
     divider()
 
@@ -106,8 +107,7 @@ def generate_order_pdf(order: Order) -> str:
     divider()
 
     # SENDER
-    ln_left(f"CUSTOMER'S ID  -  {order.id}", bold=True, size=8.5, gap=5)
-    ln_left("SPEED POST PARCEL", bold=True, size=8.5, gap=5)
+    ln_left(f"CUSTOMER'S ID  -  1567641470", bold=True, size=8.5, gap=5)
     ln_left("OM FOOTWEAR", bold=True, size=9, gap=5)
     ln_left("3, PRINCE YASHWANT ROAD", size=8.5, gap=4.5)
     ln_left("NEAR PANDARINATH MANDIR, INDORE - 452007", size=8.5, gap=4.5)
