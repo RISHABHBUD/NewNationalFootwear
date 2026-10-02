@@ -17,35 +17,41 @@
               <div class="col-md-6">
                 <label class="form-label fw-700 small">Full Name *</label>
                 <input type="text" name="name" class="form-control" required
-                       value="{{ user.name if user else '' }}" placeholder="Your full name"/>
+                       value="{{ user.name if user else '' }}" placeholder="Full Name"/>
               </div>
               <div class="col-md-6">
                 <label class="form-label fw-700 small">Phone Number *</label>
                 <input type="tel" name="phone" class="form-control" required
-                       value="{{ user.phone if user else '' }}" placeholder="10-digit mobile"/>
+                       value="{{ user.phone if user else '' }}" placeholder="Phone Number"/>
               </div>
               <div class="col-12">
                 <label class="form-label fw-700 small">Email <span class="text-muted fw-400">(optional)</span></label>
                 <input type="email" name="email" class="form-control"
-                       value="{{ user.email if user else '' }}" placeholder="you@email.com"/>
+                       value="{{ user.email if user else '' }}" placeholder="Email"/>
               </div>
               <div class="col-12">
                 <label class="form-label fw-700 small">House No. / Street / Area *</label>
                 <input type="text" name="address_line" class="form-control" required
-                       placeholder="e.g. 12, MG Road, Vijay Nagar"/>
+                       placeholder="House No. / Street / Area"/>
               </div>
               <div class="col-md-5">
                 <label class="form-label fw-700 small">City *</label>
-                <input type="text" name="city" class="form-control" required value="Indore"/>
+                <input type="text" name="city" class="form-control" required placeholder="City"/>
               </div>
               <div class="col-md-4">
                 <label class="form-label fw-700 small">State *</label>
-                <input type="text" name="state" class="form-control" required value="Madhya Pradesh"/>
+                <div class="state-dropdown-wrap" style="position:relative">
+                  <input type="text" id="stateSearch" class="form-control" placeholder="State"
+                         autocomplete="off" oninput="filterStates()" onfocus="openStateDropdown()"/>
+                  <input type="hidden" name="state" id="stateValue" required/>
+                  <div id="stateList" class="state-list" style="display:none;position:absolute;z-index:999;background:#fff;border:1.5px solid #e4e6ea;border-radius:8px;width:100%;max-height:200px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,0.1);top:100%;left:0;margin-top:3px">
+                  </div>
+                </div>
               </div>
               <div class="col-md-3">
                 <label class="form-label fw-700 small">Pincode *</label>
                 <input type="text" name="pincode" class="form-control" required
-                       maxlength="6" pattern="[0-9]{6}" placeholder="452001"/>
+                       maxlength="6" pattern="[0-9]{6}" placeholder="Pincode"/>
               </div>
             </div>
 
@@ -209,5 +215,55 @@ function setLoading(on) {
 }
 
 document.addEventListener('DOMContentLoaded', loadOrder);
+
+// STATE DROPDOWN
+const STATES = [
+  "Andhra Pradesh","Arunachal Pradesh","Assam","Bihar","Chhattisgarh",
+  "Goa","Gujarat","Haryana","Himachal Pradesh","Jharkhand","Karnataka",
+  "Kerala","Madhya Pradesh","Maharashtra","Manipur","Meghalaya","Mizoram",
+  "Nagaland","Odisha","Punjab","Rajasthan","Sikkim","Tamil Nadu","Telangana",
+  "Tripura","Uttar Pradesh","Uttarakhand","West Bengal",
+  "Andaman and Nicobar Islands","Chandigarh","Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi","Jammu and Kashmir","Ladakh","Lakshadweep","Puducherry"
+];
+
+function renderStateList(filter) {
+  const list = document.getElementById('stateList');
+  const filtered = filter
+    ? STATES.filter(s => s.toLowerCase().includes(filter.toLowerCase()))
+    : STATES;
+  list.innerHTML = filtered.map(s => `
+    <div class="state-item" onclick="selectState('${s}')"
+         style="padding:8px 14px;cursor:pointer;font-size:0.88rem;border-bottom:1px solid #f0f0f0;transition:background 0.15s"
+         onmouseover="this.style.background='#f5f6f8'" onmouseout="this.style.background='#fff'">
+      ${s}
+    </div>`).join('');
+}
+
+function openStateDropdown() {
+  renderStateList(document.getElementById('stateSearch').value);
+  document.getElementById('stateList').style.display = 'block';
+}
+
+function filterStates() {
+  renderStateList(document.getElementById('stateSearch').value);
+  document.getElementById('stateList').style.display = 'block';
+  document.getElementById('stateValue').value = '';
+}
+
+function selectState(state) {
+  document.getElementById('stateSearch').value = state;
+  document.getElementById('stateValue').value = state;
+  document.getElementById('stateList').style.display = 'none';
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.state-dropdown-wrap')) {
+    document.getElementById('stateList').style.display = 'none';
+    // restore last valid selection if user typed but didn't pick
+    const val = document.getElementById('stateValue').value;
+    if (val) document.getElementById('stateSearch').value = val;
+  }
+});
 </script>
 {% endblock %}

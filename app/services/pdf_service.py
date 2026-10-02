@@ -37,6 +37,63 @@ def num_to_words(n: int) -> str:
     return " ".join(parts)
 
 
+def _draw_label(pdf, order, x_offset, col_w):
+    """Draw the label content in a column starting at x_offset with given width."""
+    PAD = 4
+    y = [4]
+
+    def ln(text, bold=False, size=8, gap=4.5, color=(0, 0, 0)):
+        pdf.set_text_color(*color)
+        pdf.set_font("Helvetica", "B" if bold else "", size)
+        pdf.set_xy(x_offset + PAD, y[0])
+        pdf.multi_cell(col_w - PAD * 2, gap, text, align="L")
+        y[0] = pdf.get_y()
+
+    def divider():
+        pdf.set_draw_color(180, 180, 180)
+        pdf.set_line_width(0.2)
+        pdf.line(x_offset + PAD, y[0] + 1, x_offset + col_w - PAD, y[0] + 1)
+        pdf.set_draw_color(0, 0, 0)
+        y[0] += 3
+
+    # PAYMENT
+    method = order.payment_method.value.upper()
+    if method == "COD":
+        ln("Cash ON DELIVERY", bold=True, size=10, gap=6)
+        amt = int(order.subtotal)
+        ln(f"Rs. {amt}", bold=True, size=12, gap=7)
+        ln(num_to_words(amt) + " Rupees only", size=7.5, gap=4)
+        divider()
+    else:
+        divider()
+
+    # NOTE
+    ln("NOTE: This Delivery is not Open Delivery", bold=True, size=7.5, gap=4.5, color=(220, 0, 0))
+
+    divider()
+
+    # RECEIVER
+    ln("RECEIVER:", bold=True, size=8)
+    y[0] += 1
+    ln(f"Name     - {order.customer_name}", size=7.5, gap=4)
+    ln(f"Address  - {order.address_line}", size=7.5, gap=4)
+    ln(f"City        - {order.city}", size=7.5, gap=4)
+    ln(f"State      - {order.state}", size=7.5, gap=4)
+    ln(f"Pincode  - {order.pincode}", size=7.5, gap=4)
+    ln(f"Mobile   - {order.customer_phone}", size=7.5, gap=4)
+    for item in order.items:
+        ln(f"Size       - {item.size}  {item.product_name}  x{item.quantity}", size=7.5, gap=4)
+
+    divider()
+
+    # SENDER
+    ln("CUSTOMER'S ID  -  1567641470", bold=True, size=7.5, gap=4)
+    ln("OM FOOTWEAR", bold=True, size=8, gap=4)
+    ln("3, PRINCE YASHWANT ROAD", size=7.5, gap=3.5)
+    ln("NEAR PANDARINATH MANDIR, INDORE - 452007", size=7.5, gap=3.5)
+    ln("Mobile: +91 89822 02734", size=7.5, gap=3.5)
+
+
 def generate_order_pdf(order: Order) -> str:
     pdf = FPDF(orientation="P", unit="mm", format="A5")
     pdf.add_font("NotoSans", "", FONT_PATH, uni=True)
@@ -46,67 +103,16 @@ def generate_order_pdf(order: Order) -> str:
 
     PAGE_W = 148
     PAGE_H = 210
-    LEFT_W = 148
-    PAD    = 6
+    MID    = PAGE_W / 2  # 74mm
 
-    # Outer border - right side only
+    # Center vertical divider line
     pdf.set_draw_color(0, 0, 0)
-    pdf.set_line_width(0.5)
-    pdf.line(PAGE_W - 2, 2, PAGE_W - 2, PAGE_H - 2)
+    pdf.set_line_width(0.4)
+    pdf.line(MID, 2, MID, PAGE_H - 2)
 
-    y = [4]
-
-    def ln_left(text, bold=False, size=9, gap=5.5, color=(0,0,0)):
-        pdf.set_text_color(*color)
-        pdf.set_font("Helvetica", "B" if bold else "", size)
-        pdf.set_xy(PAD, y[0])
-        pdf.multi_cell(PAGE_W - PAD * 2, gap, text, align="L")
-        y[0] = pdf.get_y()
-
-    def divider():
-        pdf.set_draw_color(180, 180, 180)
-        pdf.set_line_width(0.25)
-        pdf.line(PAD, y[0] + 1, PAGE_W - PAD, y[0] + 1)
-        pdf.set_draw_color(0, 0, 0)
-        y[0] += 3.5
-
-    # PAYMENT HEADER
-    method = order.payment_method.value.upper()
-    label  = "Cash ON DELIVERY" if method == "COD" else "PAID ONLINE"
-    ln_left(label, bold=True, size=12, gap=7)
-
-    amt = int(order.subtotal)
-    ln_left(f"Rs. {amt}", bold=True, size=14, gap=8)
-    ln_left(num_to_words(amt) + " Rupees only (in words)", size=10, gap=4.5)
-
-    divider()
-
-    # NOTE (red)
-    ln_left("NOTE : This Delivery is not Open Delivery", bold=True, size=8.5, gap=5, color=(220,0,0))
-
-    divider()
-
-    # RECEIVER
-    ln_left("To:", bold=True, size=9)
-    ln_left("RECEIVER:", bold=True, size=9)
-    y[0] += 1
-    ln_left(f"Name         -  {order.customer_name}", size=9, gap=5)
-    ln_left(f"Address      -  {order.address_line}", size=9, gap=5)
-    ln_left(f"City             -  {order.city}", size=9, gap=5)
-    ln_left(f"State           -  {order.state}", size=9, gap=5)
-    ln_left(f"Pin Code     -  {order.pincode}", size=9, gap=5)
-    ln_left(f"Mobile        -  {order.customer_phone}", size=9, gap=5)
-    for item in order.items:
-        ln_left(f"Size             -  {item.size}  {item.product_name}  x{item.quantity}", size=9, gap=5)
-
-    divider()
-
-    # SENDER
-    ln_left(f"CUSTOMER'S ID  -  1567641470", bold=True, size=8.5, gap=5)
-    ln_left("OM FOOTWEAR", bold=True, size=9, gap=5)
-    ln_left("3, PRINCE YASHWANT ROAD", size=8.5, gap=4.5)
-    ln_left("NEAR PANDARINATH MANDIR, INDORE - 452007", size=8.5, gap=4.5)
-    ln_left("Mobile: +91 89822 02734", size=8.5, gap=4.5)
+    # Draw same content on left and right
+    _draw_label(pdf, order, x_offset=0,   col_w=MID)
+    _draw_label(pdf, order, x_offset=MID, col_w=MID)
 
     tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pdf", prefix=f"label_{order.id}_")
     pdf.output(tmp.name)
