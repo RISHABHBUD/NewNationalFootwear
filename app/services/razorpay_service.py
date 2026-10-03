@@ -1,4 +1,5 @@
 import razorpay
+import httpx
 from app.config import settings
 
 client = razorpay.Client(auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET))
@@ -11,7 +12,15 @@ def create_order(amount_rupees: float, receipt: str) -> dict:
         "currency": "INR",
         "receipt": receipt,
     }
-    return client.order.create(data=data)
+    # Use httpx with a 10s timeout instead of razorpay SDK (which has no timeout)
+    response = httpx.post(
+        "https://api.razorpay.com/v1/orders",
+        auth=(settings.RAZORPAY_KEY_ID, settings.RAZORPAY_KEY_SECRET),
+        json=data,
+        timeout=10.0,
+    )
+    response.raise_for_status()
+    return response.json()
 
 
 def verify_payment(razorpay_order_id: str, razorpay_payment_id: str, razorpay_signature: str) -> bool:
